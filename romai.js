@@ -685,7 +685,7 @@ async function setupCamera() {
   video.height = videoHeight;
 
   const mobile = isMobile();
-  let constraintObj = { 'audio': true, 'video': { facingMode: 'user', width: mobile ? undefined : videoWidth, height: mobile ? undefined : videoHeight} }
+  let constraintObj = { 'audio': false, 'video': { facingMode: 'user', width: mobile ? undefined : videoWidth, height: mobile ? undefined : videoHeight} }
 
   navigator.mediaDevices.getUserMedia(constraintObj).then(function(mediaStreamObj) {
       video.srcObject = mediaStreamObj;
@@ -715,10 +715,9 @@ async function setupCamera() {
           document.body.removeChild(link);
           console.log("VIDEO DOWNLOADED SUCCESSFULLY.");
           */
-          var FileSaver = require('file-saver');
-          FileSaver.saveAs(blob, videoName);
+          saveAs(blob, videoName);
           console.log("VIDEO SAVED SUCCESSFULLY."+videoName);
-          FileSaver.saveAs(blob, savedVideoURL);
+          saveAs(blob, savedVideoURL);
           console.log("VIDEO SAVED SUCCESSFULLY."+savedVideoURL);          
           // call enqueue api
           const data = {

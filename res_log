@@ -32,6 +32,7 @@ posenet.js                                  :: tfjs-models posenet main script
 romai.js                                    :: main script
 speech-commands.js                          :: speech-commands (voice recognition) main script
 tf.js                                       :: the mighty tf.js library
+file-saver.js                               :: for saving video (blob) at directory
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
                                                                             OTHERS
