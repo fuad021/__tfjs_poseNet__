@@ -14,6 +14,15 @@ function predictWord() {
         global_recognizer = scores[0].word;
     }, {probabilityThreshold: 0.80});
 }
+
+async function voice_recognizer_app()
+{
+    recognizer = speechCommands.create('BROWSER_FFT');
+    await recognizer.ensureModelLoaded();
+    predictWord();
+}
+
+voice_recognizer_app();
 // ================================================================================
 
 // ================================================================================
@@ -691,10 +700,12 @@ async function setupCamera() {
       mediaRecorder.onstop = function(ev) {
           const blob = new Blob(chunks, {'type':'video/mp4;'}); chunks = [];
           const blobVideoURL = window.URL.createObjectURL(blob);
-          const savedVideoURL = '/home/mmhai/rom/__tfjs_poseNet__/raw_videos/' + patientId + '-' + exerciseName + '-raw.mp4';
-          const retrieveVideoByURL = 'https://rom.injurycloud.com/raw_videos/' + patientId + '-' + exerciseName + '-raw.mp4';
+          const savedVideoURL = 'raw_videos/' + patientId + '-' + exerciseName + '-raw.mp4';
+          const retrieveVideoByURL = 'https://rom.injurycloud.com/' + patientId + '-' + exerciseName + '-raw.mp4';
+          const videoName = patientId + '-' + exerciseName + '-raw.mp4';
           
-          // saving recorded video
+          // downloading recorded video
+          /*
           const link = document.createElement('a');
           link.href = blobVideoURL;
           link.download = savedVideoURL;
@@ -702,8 +713,13 @@ async function setupCamera() {
           document.body.appendChild(link);
           link.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));
           document.body.removeChild(link);
-          console.log("VIDEO SAVED SUCCESSFULLY.");
-          
+          console.log("VIDEO DOWNLOADED SUCCESSFULLY.");
+          */
+          var FileSaver = require('file-saver');
+          FileSaver.saveAs(blob, videoName);
+          console.log("VIDEO SAVED SUCCESSFULLY."+videoName);
+          FileSaver.saveAs(blob, savedVideoURL);
+          console.log("VIDEO SAVED SUCCESSFULLY."+savedVideoURL);          
           // call enqueue api
           const data = {
               'patientId': patientId,
