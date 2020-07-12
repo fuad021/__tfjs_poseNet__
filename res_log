@@ -31,10 +31,7 @@ dat.gui.min.js                              :: tfjs-models posenet gui script
 posenet.js                                  :: tfjs-models posenet main script
 romai.js                                    :: main script
 speech-commands.js                          :: speech-commands (voice recognition) main script
-
-tf.js                                       :: tf.js of tfjs-models posenet
-speech-commands-tf.js                       :: tf.js of speech-commands.js (this could be compatible with tf.js)
-
+tf.js                                       :: the mighty tf.js library
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
                                                                             OTHERS
@@ -42,3 +39,4 @@ speech-commands-tf.js                       :: tf.js of speech-commands.js (this
 index.html                                  :: main page
 style.css                                   :: tfjs-models posenet style
 favicon.ico                                 :: mmh icon
+raw_videos/                                 :: for deployment ease (storage of recordings)

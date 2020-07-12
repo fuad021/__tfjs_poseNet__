@@ -4,6 +4,7 @@
 let recognizer;
 let global_recognizer = '';
 let is_enabled = false;
+let chunks = [];
 
 function predictWord() {
     const words = recognizer.wordLabels();
@@ -230,6 +231,10 @@ function user_voice_captured()
         beep_mb = false;
         wrong_pose_mb = false;
         completed_mb = false;
+        
+        mediaRecorder.stop();
+        chunks = [];        
+        console.log('RECORDING (deleted) - state ::', mediaRecorder.state);
     }
     
     if (global_recognizer !== user_voice)
@@ -671,14 +676,13 @@ async function setupCamera() {
   video.height = videoHeight;
 
   const mobile = isMobile();
-  let constraintObj = { 'audio': false, 'video': { facingMode: 'user', width: mobile ? undefined : videoWidth, height: mobile ? undefined : videoHeight} }
+  let constraintObj = { 'audio': true, 'video': { facingMode: 'user', width: mobile ? undefined : videoWidth, height: mobile ? undefined : videoHeight} }
 
   navigator.mediaDevices.getUserMedia(constraintObj).then(function(mediaStreamObj) {
       video.srcObject = mediaStreamObj;
       
 // ---------------- record exercise starts -----------------------
       mediaRecorder = new MediaRecorder(mediaStreamObj);
-      let chunks = [];
       
       mediaRecorder.ondataavailable = function(ev) {
           chunks.push(ev.data);
