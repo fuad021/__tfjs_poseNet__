@@ -11,7 +11,7 @@ function predictWord() {
         scores = Array.from(scores).map((s, i) => ({score: s, word: words[i]}));
         scores.sort((s1, s2) => s2.score - s1.score);
         global_recognizer = scores[0].word;
-    }, {probabilityThreshold: 0.95});
+    }, {probabilityThreshold: 0.80});
 }
 // ================================================================================
 
@@ -671,7 +671,7 @@ async function setupCamera() {
   video.height = videoHeight;
 
   const mobile = isMobile();
-  let constraintObj = { 'audio': true, 'video': { facingMode: 'user', width: mobile ? undefined : videoWidth, height: mobile ? undefined : videoHeight} }
+  let constraintObj = { 'audio': false, 'video': { facingMode: 'user', width: mobile ? undefined : videoWidth, height: mobile ? undefined : videoHeight} }
 
   navigator.mediaDevices.getUserMedia(constraintObj).then(function(mediaStreamObj) {
       video.srcObject = mediaStreamObj;
