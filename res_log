@@ -1,0 +1,44 @@
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                                                           WEIGHTS
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+float                                       :: posenet - weights of mobilenet folderized, others (long list) are of resnet
+quant1                                      :: posenet - weights of mobilenet folderized, others (long list) are of resnet
+quant2                                      :: posenet - weights of mobilenet folderized, others (long list) are of resnet
+18w                                         :: speech-command
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                                                            VOICES
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+beep                                        :: beep (start rec notification)
+beep_go                                     :: Please start the exercise after listening the 'Beep' sound. When finished, say, 'Go'.
+chin2chest_start                            :: Now we will start chin to chest exercise
+face_negatice                               :: We can't see your face. Please stand properly in front of camera.
+full_body_negative                          :: We can't see your full body. Please go back.
+full_body_positive                          :: Full body captured.
+sideface_YES                                :: Stand side to the camera. Your whole body needs to be seen. When ready say "YES"
+welcome                                     :: Welcome to my medical hub.
+wrong_pose                                  :: You are in a wrong pose. Please stand according to given instructions.
+successfully_completed                      :: You have successfully completed the exercise.
+fullbodyPos_chin2chestStart                 :: Full body captured.  Now we will start chin to chest exercise. Stand side to the camera. Your whole body needs to be
+                                               seen. When ready say "YES" (full_body_positive + chin2chest_start + sideface_YES)
+finish_go_beep                              :: Please start the exercise after listening the 'Beep' sound. When finished, say, 'Go'. [BEEP] (beep_go + beep)
+say_yes                                     :: When ready say yes.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                                                            SCRIPTS
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+dat.gui.min.js                              :: tfjs-models posenet gui script
+posenet.js                                  :: tfjs-models posenet main script
+romai.js                                    :: main script
+speech-commands.js                          :: speech-commands (voice recognition) main script
+
+tf.js                                       :: tf.js of tfjs-models posenet
+speech-commands-tf.js                       :: tf.js of speech-commands.js (this could be compatible with tf.js)
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                                                            OTHERS
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+index.html                                  :: main page
+style.css                                   :: tfjs-models posenet style
+favicon.ico                                 :: mmh icon
