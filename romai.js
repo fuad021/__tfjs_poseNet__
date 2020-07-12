@@ -67,7 +67,7 @@ let curr_time = Date.now();
 let waiting_yes_time = Date.now();
 let yes_triggered = 99999;
 
-let interval = 5000;
+let interval = 10000;
 let checker = setInterval(checkPoint, interval);
 
 let mediaRecorder = 'not init';
@@ -671,7 +671,7 @@ async function setupCamera() {
   video.height = videoHeight;
 
   const mobile = isMobile();
-  let constraintObj = { 'audio': false, 'video': { facingMode: 'user', width: mobile ? undefined : videoWidth, height: mobile ? undefined : videoHeight} }
+  let constraintObj = { 'audio': true, 'video': { facingMode: 'user', width: mobile ? undefined : videoWidth, height: mobile ? undefined : videoHeight} }
 
   navigator.mediaDevices.getUserMedia(constraintObj).then(function(mediaStreamObj) {
       video.srcObject = mediaStreamObj;
