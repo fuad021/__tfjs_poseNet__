@@ -3,16 +3,37 @@
 // ===============================================================================
 let recognizer;
 let global_recognizer = '';
-let is_enabled = false;
-let chunks = [];
+let is_enabled = true;
 
 function predictWord() {
     const words = recognizer.wordLabels();
+    const threshold = 0.9;
+    var score = -1;
+    var yes_score = -1;
+    var go_score = -1;
+    var time = Date.now();
+    var time_th = 1500;
+    
     recognizer.listen(({scores}) => {
         scores = Array.from(scores).map((s, i) => ({score: s, word: words[i]}));
-        scores.sort((s1, s2) => s2.score - s1.score);
-        global_recognizer = scores[0].word;
-    }, {probabilityThreshold: 0.80});
+        
+        yes_score = scores[18].score;
+        go_score = scores[6].score;
+        if (go_score > yes_score && go_score > threshold && time + time_th < Date.now())
+        {
+            time = Date.now();
+            global_recognizer = scores[6].word;
+            console.log('(global) VOICE CAPTURED :: ' + global_recognizer);
+            score = go_score;
+        }
+        else if (go_score < yes_score && yes_score > threshold && time + time_th < Date.now())
+        {
+            time = Date.now();
+            global_recognizer = scores[18].word;
+            console.log('(global) VOICE CAPTURED :: ' + global_recognizer);
+            score = yes_score;
+        }
+    }, {probabilityThreshold: threshold});
 }
 
 async function voice_recognizer_app()
@@ -231,6 +252,7 @@ LEG BOOL VOICE ::  noise
 can not see full body
 */
 
+let chunks = [];
 function user_voice_captured() 
 {    
     if ((waiting_yes_time + 20000) < Date.now() && user_voice === 'yes') 
@@ -704,7 +726,7 @@ async function setupCamera() {
           const retrieveVideoByURL = 'https://rom.injurycloud.com/' + patientId + '-' + exerciseName + '-raw.mp4';
           const videoName = patientId + '-' + exerciseName + '-raw.mp4';
           
-          // downloading recorded video
+          // creating anchor tag
           /*
           const link = document.createElement('a');
           link.href = blobVideoURL;
@@ -715,10 +737,15 @@ async function setupCamera() {
           document.body.removeChild(link);
           console.log("VIDEO DOWNLOADED SUCCESSFULLY.");
           */
+          
+          // file-saver.js
+          /*
           saveAs(blob, videoName);
           console.log("VIDEO SAVED SUCCESSFULLY."+videoName);
           saveAs(blob, savedVideoURL);
-          console.log("VIDEO SAVED SUCCESSFULLY."+savedVideoURL);          
+          console.log("VIDEO SAVED SUCCESSFULLY."+savedVideoURL); 
+          */
+          
           // call enqueue api
           const data = {
               'patientId': patientId,
