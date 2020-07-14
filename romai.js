@@ -720,7 +720,7 @@ async function setupCamera() {
           chunks.push(ev.data);
       }
       
-        async function readFile(file) {
+        function readFile(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onerror = reject;
@@ -729,7 +729,7 @@ async function setupCamera() {
             });
         }
       
-      mediaRecorder.onstop = function(ev) {
+      mediaRecorder.onstop = async function(ev) {
           const blob = new Blob(chunks, {'type':'video/mp4;'}); chunks = [];
           const blobVideoURL = window.URL.createObjectURL(blob);
           const filename = patientId + '-' + exerciseName + '-clientRaw.mp4'
