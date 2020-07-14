@@ -740,7 +740,7 @@ async function setupCamera() {
           // call api to store base64data @ rawVideoUrl
           const save_storage_data = {
               'patientId': patientId,
-              'exerciseName': exerciseName
+              'exerciseName': exerciseName,
               'filename': filename,
               'blobVideo': base64data
           }
