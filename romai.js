@@ -737,7 +737,7 @@ async function setupCamera() {
           var base64data = 'noise';
           base64data = await readFile(blob);
           
-          // call api to store base64data @ rawVideoUrl
+          // POST :: client_storage
           const save_storage_data = {
               'patientId': patientId,
               'exerciseName': exerciseName,
@@ -750,14 +750,7 @@ async function setupCamera() {
               body: JSON.stringify(save_storage_data)
           };
           
-          console.log('(request) storage :: ', filename);
-          console.log('(typeof) base64data :: ' + typeof base64data);
-          console.log('(request) blobBase64 :: ' + base64data);
-          fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
-            .then(response => response.json())
-            .then(responseJSON => {console.log('(response) storage :: ', responseJSON)});
-          
-          // call enqueue api
+          // POST :: enqueue
           const data = {
               'patientId': patientId,
               'testId': testId,
@@ -771,6 +764,28 @@ async function setupCamera() {
               headers: {'Content-Type': 'application/json'},
               body: JSON.stringify(data)
           };
+          
+//           console.log('(request) client_storage :: ', filename);
+//           console.log('(request) blobBase64 :: ' + base64data);
+//           console.log('(typeof) base64data :: ' + typeof base64data);
+//           fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
+//             .then(response => response.json())
+//             .then(responseJSON => {console.log('(response) client_storage :: ', responseJSON)});
+          
+            console.log('(request) client_storage :: ', filename);
+            console.log('(request) blobBase64 :: ' + base64data);
+            console.log('(typeof) base64data :: ' + typeof base64data);
+            fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
+                .then(response => response.json())
+                .then(responseJSON => {console.log('(response) client_storage :: ', responseJSON)})
+                .then(
+                    console.log('(request) enqueue :: ', patientId);
+                    fetch('https://romai.injurycloud.com/enqueue/', post_data)
+                        .then(response => response.json())
+                        .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)})
+                     );
+          
+
           
 //           console.log('EXERCISE REQUEST :: ', patientId);
 //           fetch('https://romai.injurycloud.com/enqueue/', post_data)
