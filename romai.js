@@ -736,7 +736,8 @@ async function setupCamera() {
           const rawVideoUrl = 'https://romai.injurycloud.com/client_storage/' + filename
           var base64data = 'noise';
           base64data = await readFile(blob);
-          console.log('(reader) base64data :: ' + base64data);
+          console.log('(reader) base64data :: ' + base64data.slice(0, 21));
+          console.log('(typeof) base64data :: ' + typeof base64data);
 
 //           var reader = new FileReader();
 //           reader.onloadend = () => { base64data = reader.result; console.log('(reader) base64data :: ' + base64data)}
