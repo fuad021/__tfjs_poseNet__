@@ -720,20 +720,27 @@ async function setupCamera() {
           chunks.push(ev.data);
       }
       
+        async function readFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = reject;
+                reader.onloadend = function() {resolve(reader.result); }
+                reader.readAsDataURL(file);
+            });
+        }
+      
       mediaRecorder.onstop = function(ev) {
           const blob = new Blob(chunks, {'type':'video/mp4;'}); chunks = [];
           const blobVideoURL = window.URL.createObjectURL(blob);
           const filename = patientId + '-' + exerciseName + '-clientRaw.mp4'
           const rawVideoUrl = 'https://romai.injurycloud.com/client_storage/' + filename
           var base64data = 'noise';
+          base64data = await readFile(blob);
+          console.log('(reader) base64data :: ' + base64data);
 
-          var reader = new FileReader();
-          reader.onloadend = () => { base64data = reader.result; console.log('(reader) base64data :: ' + base64data)}
-          reader.readAsDataURL(blob); 
-          
-//           reader.onloadend = function() {
-//               base64data = reader.result;
-//           }
+//           var reader = new FileReader();
+//           reader.onloadend = () => { base64data = reader.result; console.log('(reader) base64data :: ' + base64data)}
+//           reader.readAsDataURL(blob);
           
           // call api to store base64data @ rawVideoUrl
           const save_storage_data = {
