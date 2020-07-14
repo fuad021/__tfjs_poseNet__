@@ -733,11 +733,6 @@ async function setupCamera() {
               base64data = reader.result;
           }
           
-          console.log('----------ALERT----------');
-          console.log();
-          console.log(base64data);
-          console.log();
-          
           // call api to store base64data @ rawVideoUrl
           const save_storage_data = {
               'patientId': patientId,
@@ -750,10 +745,11 @@ async function setupCamera() {
               headers: {'Content-Type': 'application/json'},
               body: JSON.stringify(save_storage_data)
           };
-          console.log('STORAGE REQUEST :: ', filename);
+          console.log('(request) storage :: ', filename);
+          console.log('(request) blobBase64 :: ' + base64data);
           fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
             .then(response => response.json())
-            .then(responseJSON => {console.log('STORAGE REQUEST SUCCESSFUL :: ', responseJSON)});
+            .then(responseJSON => {console.log('(response) storage :: ', responseJSON)});
           
           // call enqueue api
           const data = {
