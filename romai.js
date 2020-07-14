@@ -23,14 +23,14 @@ function predictWord() {
         {
             time = Date.now();
             global_recognizer = scores[6].word;
-            console.log('(global) VOICE CAPTURED :: ' + global_recognizer);
+            console.log('(predictWord) CAPTURED :: ' + global_recognizer);
             score = go_score;
         }
         else if (go_score < yes_score && yes_score > threshold && time + time_th < Date.now())
         {
             time = Date.now();
             global_recognizer = scores[18].word;
-            console.log('(global) VOICE CAPTURED :: ' + global_recognizer);
+            console.log('(predictWord) CAPTURED :: ' + global_recognizer);
             score = yes_score;
         }
     }, {probabilityThreshold: threshold});
@@ -44,6 +44,16 @@ async function voice_recognizer_app()
 }
 
 voice_recognizer_app();
+
+// blob to base64
+function readFile(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onloadend = function() {resolve(reader.result); }
+        reader.readAsDataURL(file);
+    });
+}
 // ================================================================================
 
 // ================================================================================
@@ -720,15 +730,6 @@ async function setupCamera() {
           chunks.push(ev.data);
       }
       
-        function readFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onerror = reject;
-                reader.onloadend = function() {resolve(reader.result); }
-                reader.readAsDataURL(file);
-            });
-        }
-      
       mediaRecorder.onstop = async function(ev) {
           const blob = new Blob(chunks, {'type':'video/mp4;'}); chunks = [];
           const blobVideoURL = window.URL.createObjectURL(blob);
@@ -765,15 +766,8 @@ async function setupCamera() {
               body: JSON.stringify(data)
           };
           
-//           console.log('(request) client_storage :: ', filename);
-//           console.log('(request) blobBase64 :: ' + base64data);
-//           console.log('(typeof) base64data :: ' + typeof base64data);
-//           fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
-//             .then(response => response.json())
-//             .then(responseJSON => {console.log('(response) client_storage :: ', responseJSON)});
-          
             console.log('(request) client_storage :: ' + filename);
-            console.log('(request) blobBase64 :: ' + base64data);
+            console.log('(request) blobBase64 :: ' + base64data.substring(0, 21));
             console.log('(typeof) base64data :: ' + typeof base64data);
             fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
                 .then(response => response.json())
@@ -781,27 +775,6 @@ async function setupCamera() {
                 .then(fetch('https://romai.injurycloud.com/enqueue/', post_data)
                           .then(response => response.json())
                           .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)}));
-          
-//           console.log('EXERCISE REQUEST :: ', patientId);
-//           fetch('https://romai.injurycloud.com/enqueue/', post_data)
-//             .then(response => response.json())
-//             .then(responseJSON => {console.log('EXERCISE REQUEST SUCCESSFUL :: ', responseJSON)});
-//           console.log('RAW VIDEO :: ', rawVideoUrl);
-          
-          
-          
-//           console.log('STORAGE REQUEST :: ', filename);
-//           fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
-//             .then(response => response.json())
-//             .then(responseJSON => {console.log('STORAGE REQUEST SUCCESSFUL :: ', responseJSON)})
-//             .then(console.log('RAW VIDEO URL :: ', rawVideoUrl))
-//             .then(
-//               console.log('EXERCISE REQUEST :: ', patientId);
-//               fetch('https://romai.injurycloud.com/enqueue/', post_data)
-//                 .then(response => response.json())
-//                 .then(responseJSON => {console.log('EXERCISE REQUEST SUCCESSFUL :: ', responseJSON)})
-//                 .then(console.log('RAW VIDEO :: ', rawVideoUrl))
-//             );
       }
 // ---------------- record exercise ends -----------------------
 
