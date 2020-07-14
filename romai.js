@@ -725,11 +725,12 @@ async function setupCamera() {
           const blobVideoURL = window.URL.createObjectURL(blob);
           const filename = patientId + '-' + exerciseName + '-clientRaw.mp4'
           const rawVideoUrl = 'https://romai.injurycloud.com/client_storage/' + filename
-          
+          var base64data = 'noise';
+
           var reader = new FileReader();
           reader.readAsDataURL(blob); 
           reader.onloadend = function() {
-              const base64data = reader.result;
+              base64data = reader.result;
           }
           
           console.log('----------ALERT----------');
