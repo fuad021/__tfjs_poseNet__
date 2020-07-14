@@ -115,6 +115,7 @@ function resetTimer(new_interval)
     {
         interval = new_interval;
         clearInterval(checker);
+        
         checker = setInterval(checkPoint, interval);
     }
 }
