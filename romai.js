@@ -778,7 +778,7 @@ async function setupCamera() {
             fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
                 .then(response => response.json())
                 .then(responseJSON => {console.log('(response) client_storage :: ', responseJSON)})
-                .then(fetch('https://romai.injurycloud.com/enqueue/' + post_data)
+                .then(fetch('https://romai.injurycloud.com/enqueue/', post_data)
                           .then(response => response.json())
                           .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)}));
           
