@@ -778,14 +778,10 @@ async function setupCamera() {
             fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
                 .then(response => response.json())
                 .then(responseJSON => {console.log('(response) client_storage :: ', responseJSON)})
-                .then(
-                    console.log('(request) enqueue :: ' + patientId);
-                    fetch('https://romai.injurycloud.com/enqueue/' + post_data)
-                        .then(response => response.json())
-                        .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)})
-                     );
-          
-
+                .then(console.log('(request) enqueue :: ' + patientId);
+                      fetch('https://romai.injurycloud.com/enqueue/' + post_data)
+                          .then(response => response.json())
+                          .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)}));
           
 //           console.log('EXERCISE REQUEST :: ', patientId);
 //           fetch('https://romai.injurycloud.com/enqueue/', post_data)
