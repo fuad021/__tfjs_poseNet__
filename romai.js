@@ -230,18 +230,16 @@ function play_audio(audio_dir, message)
 
 function check_head(keypoints)
 {
-  if (keypoints[1].score < confidence_score || keypoints[2].score < confidence_score)
-  {
+  if (keypoints[1].score < confidence_score || keypoints[2].score < confidence_score || keypoints[3].score < confidence_score || keypoints[4].score < confidence_score)
       return false;
-  }
   else
       return true;
 }
 
 function check_leg(keypoints)
 {
-  if (keypoints[3].score < confidence_score) // surreal
-  // if (keypoints[15].score < confidence_score || keypoints[16].score < confidence_score) // real // SHORTCUT ALERT
+  // if (keypoints[3].score < confidence_score) // surreal
+  if (keypoints[15].score < confidence_score || keypoints[16].score < confidence_score)     // SHORTCUT ALERT
       return false;
   else
       return true;
