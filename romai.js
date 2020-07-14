@@ -722,51 +722,73 @@ async function setupCamera() {
       mediaRecorder.onstop = function(ev) {
           const blob = new Blob(chunks, {'type':'video/mp4;'}); chunks = [];
           const blobVideoURL = window.URL.createObjectURL(blob);
-          const savedVideoURL = 'raw_videos/' + patientId + '-' + exerciseName + '-raw.mp4';
-          const retrieveVideoByURL = 'https://rom.injurycloud.com/' + patientId + '-' + exerciseName + '-raw.mp4';
-          const videoName = patientId + '-' + exerciseName + '-raw.mp4';
+          const filename = patientId + '-' + exerciseName + '-clientRaw.mp4'
+          const rawVideoUrl = 'https://romai.injurycloud.com/client_storage/' + filename
           
-          // creating anchor tag
-          /*
-          const link = document.createElement('a');
-          link.href = blobVideoURL;
-          link.download = savedVideoURL;
+          var reader = new FileReader();
+          reader.readAsDataURL(blob); 
+          reader.onloadend = function() {
+              const base64data = reader.result;
+          }
           
-          document.body.appendChild(link);
-          link.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));
-          document.body.removeChild(link);
-          console.log("VIDEO DOWNLOADED SUCCESSFULLY.");
-          */
+          console.log('----------ALERT----------');
+          console.log();
+          console.log(base64data);
+          console.log();
           
-          // file-saver.js
-          /*
-          saveAs(blob, videoName);
-          console.log("VIDEO SAVED SUCCESSFULLY."+videoName);
-          saveAs(blob, savedVideoURL);
-          console.log("VIDEO SAVED SUCCESSFULLY."+savedVideoURL); 
-          */
+          // call api to store base64data @ rawVideoUrl
+          const save_storage_data = {
+              'patientId': patientId,
+              'exerciseName': exerciseName
+              'filename': filename,
+              'blobVideo': base64data
+          }
+          const post_storage_data = {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify(save_storage_data)
+          };
+          console.log('STORAGE REQUEST :: ', filename);
+          fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
+            .then(response => response.json())
+            .then(responseJSON => {console.log('STORAGE REQUEST SUCCESSFUL :: ', responseJSON)})
+            .then(console.log('RAW VIDEO URL :: ', rawVideoUrl));
           
           // call enqueue api
           const data = {
               'patientId': patientId,
               'testId': testId,
               'tenant': tenant,
-              'rawVideoUrl': retrieveVideoByURL,
+              'rawVideoUrl': rawVideoUrl,
               'height': height,
               'exerciseName': exerciseName
           }
-          
           const post_data = {
               method: 'POST',
               headers: {'Content-Type': 'application/json'},
               body: JSON.stringify(data)
           };
           
-          console.log('SENDING REQUEST :: ', patientId);
-          console.log('RAW VIDEO :: ', retrieveVideoByURL);
-          fetch('https://romai.injurycloud.com/enqueue/', post_data)
-            .then(response => response.json())
-            .then(responseJSON => {console.log('REQUEST SUCCESSFUL :: ', responseJSON)});
+//           console.log('EXERCISE REQUEST :: ', patientId);
+//           fetch('https://romai.injurycloud.com/enqueue/', post_data)
+//             .then(response => response.json())
+//             .then(responseJSON => {console.log('EXERCISE REQUEST SUCCESSFUL :: ', responseJSON)});
+//           console.log('RAW VIDEO :: ', rawVideoUrl);
+          
+          
+          
+//           console.log('STORAGE REQUEST :: ', filename);
+//           fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
+//             .then(response => response.json())
+//             .then(responseJSON => {console.log('STORAGE REQUEST SUCCESSFUL :: ', responseJSON)})
+//             .then(console.log('RAW VIDEO URL :: ', rawVideoUrl))
+//             .then(
+//               console.log('EXERCISE REQUEST :: ', patientId);
+//               fetch('https://romai.injurycloud.com/enqueue/', post_data)
+//                 .then(response => response.json())
+//                 .then(responseJSON => {console.log('EXERCISE REQUEST SUCCESSFUL :: ', responseJSON)})
+//                 .then(console.log('RAW VIDEO :: ', rawVideoUrl))
+//             );
       }
 // ---------------- record exercise ends -----------------------
 
