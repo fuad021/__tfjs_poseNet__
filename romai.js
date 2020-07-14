@@ -729,9 +729,11 @@ async function setupCamera() {
 
           var reader = new FileReader();
           reader.readAsDataURL(blob); 
-          reader.onloadend = function() {
-              base64data = reader.result;
-          }
+          reader.onload = function() {base64data = reader.result}
+          
+//           reader.onloadend = function() {
+//               base64data = reader.result;
+//           }
           
           // call api to store base64data @ rawVideoUrl
           const save_storage_data = {
