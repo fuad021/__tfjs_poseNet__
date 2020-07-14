@@ -772,15 +772,15 @@ async function setupCamera() {
 //             .then(response => response.json())
 //             .then(responseJSON => {console.log('(response) client_storage :: ', responseJSON)});
           
-            console.log('(request) client_storage :: ', filename);
+            console.log('(request) client_storage :: ' + filename);
             console.log('(request) blobBase64 :: ' + base64data);
             console.log('(typeof) base64data :: ' + typeof base64data);
             fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
                 .then(response => response.json())
                 .then(responseJSON => {console.log('(response) client_storage :: ', responseJSON)})
                 .then(
-                    console.log('(request) enqueue :: ', patientId);
-                    fetch('https://romai.injurycloud.com/enqueue/', post_data)
+                    console.log('(request) enqueue :: ' + patientId);
+                    fetch('https://romai.injurycloud.com/enqueue/' + post_data)
                         .then(response => response.json())
                         .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)})
                      );
