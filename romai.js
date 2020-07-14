@@ -728,8 +728,8 @@ async function setupCamera() {
           var base64data = 'noise';
 
           var reader = new FileReader();
+          reader.onloadend = () => { base64data = reader.result; console.log('(reader) base64data :: ' base64data)}
           reader.readAsDataURL(blob); 
-          reader.onload = function() {base64data = reader.result}
           
 //           reader.onloadend = function() {
 //               base64data = reader.result;
