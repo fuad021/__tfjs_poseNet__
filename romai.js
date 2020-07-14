@@ -736,12 +736,6 @@ async function setupCamera() {
           const rawVideoUrl = 'https://romai.injurycloud.com/client_storage/' + filename
           var base64data = 'noise';
           base64data = await readFile(blob);
-          console.log('(reader) base64data :: ' + base64data.slice(0, 21));
-          console.log('(typeof) base64data :: ' + typeof base64data);
-
-//           var reader = new FileReader();
-//           reader.onloadend = () => { base64data = reader.result; console.log('(reader) base64data :: ' + base64data)}
-//           reader.readAsDataURL(blob);
           
           // call api to store base64data @ rawVideoUrl
           const save_storage_data = {
@@ -756,6 +750,7 @@ async function setupCamera() {
               body: JSON.stringify(save_storage_data)
           };
           console.log('(request) storage :: ', filename);
+          console.log('(typeof) base64data :: ' + typeof base64data);
           console.log('(request) blobBase64 :: ' + base64data);
           fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
             .then(response => response.json())
