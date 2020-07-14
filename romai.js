@@ -749,6 +749,7 @@ async function setupCamera() {
               headers: {'Content-Type': 'application/json'},
               body: JSON.stringify(save_storage_data)
           };
+          
           console.log('(request) storage :: ', filename);
           console.log('(typeof) base64data :: ' + typeof base64data);
           console.log('(request) blobBase64 :: ' + base64data);
