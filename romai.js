@@ -240,12 +240,9 @@ function check_head(keypoints)
 
 function check_leg(keypoints)
 {
-  if (keypoints[10].score < confidence_score) // surreal
-  // if (keypoints[0].score < confidence_score) // urreal
+  if (keypoints[3].score < confidence_score) // surreal
   // if (keypoints[15].score < confidence_score || keypoints[16].score < confidence_score) // real // SHORTCUT ALERT
-  {
       return false;
-  }
   else
       return true;
 }
@@ -767,12 +764,12 @@ async function setupCamera() {
           };
           
             console.log('(request) client_storage :: ' + filename);
-            console.log('(request) blobBase64 :: ' + base64data.substring(0, 21));
+            console.log('(request) blobBase64 :: ' + base64data.substring(0, 121));
             console.log('(typeof) base64data :: ' + typeof base64data);
             fetch('https://romai.injurycloud.com/client_storage/', post_storage_data)
                 .then(response => response.json())
                 .then(responseJSON => {console.log('(response) client_storage :: ', responseJSON)})
-                .then(fetch('https://romai.injurycloud.com/enqueue/', post_data)
+                .then(fetch('https://romai.injurycloud.com/process_exercise/', post_data)
                           .then(response => response.json())
                           .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)}));
       }
