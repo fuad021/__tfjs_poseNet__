@@ -2,30 +2,17 @@
 <html>
     <head>
         <title>ROM Ai - MyMedicalHub™</title>
-        <script type="text/javascript" src="./tf.js"></script>
-        <script type="text/javascript" src="./posenet.js"></script>
-        <script type="text/javascript" src="./dat.gui.min.js"></script>
-
-        <script type="text/javascript" src="./speech-commands.js"></script>
-            
         <link rel="stylesheet" type="text/css" href="./style.css">
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
 
-    <body>
-        <div id="info" style='display:none'></div>
-        
-        <div id="loading" style='display:flex'>
-            <div class="spinner-text">
-                Loading PoseNet model...
-            </div>
-            <div class="sk-spinner sk-spinner-pulse"></div>
-        </div>
-        
-        <div id='main' style='display:none'>
-            <video id="video" playsinline style="display: none;"></video>
-            <canvas id="output" />
-        </div>
+    <body>        
+        <h2>Range of Motion Exercises</h2>
+        <h3>Select Mode</h3>
+        <ul>
+            <li><a href="mode-auto.html">Automatic Mode</a></li></br>
+            <li><a href="mode-semi.html">Semi-manual Mode</a></li></br>
+        </ul>
         
         <div class="footer">
             <div class="footer-text">
@@ -34,8 +21,5 @@
                 </p>
             </div>
         </div>
-        
-        <script src="romai.js"></script>
-
     </body>
 </html>
