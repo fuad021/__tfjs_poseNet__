@@ -229,8 +229,8 @@ function check_head(keypoints)
 
 function check_leg(keypoints)
 {
-  if (keypoints[0].score < confidence_score) // surreal
-  // if (keypoints[15].score < confidence_score && keypoints[16].score < confidence_score)     // SHORTCUT ALERT
+  // if (keypoints[0].score < confidence_score) // surreal
+  if (keypoints[15].score < confidence_score && keypoints[16].score < confidence_score)     // SHORTCUT ALERT
       return false;
   else
       return true;
@@ -738,7 +738,7 @@ async function setupCamera() {
           };
           
             // api calls
-            /*
+            
             console.log('(request) client_storage :: ' + filename);
             console.log('(request) blobBase64 :: ' + base64data.substring(0, 121));
             console.log('(typeof) base64data :: ' + typeof base64data);
@@ -748,14 +748,16 @@ async function setupCamera() {
                 .then(fetch('https://romai.injurycloud.com/process_exercise/', post_data)
                             .then(response => response.json())
                             .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)}));
-            */
+            
             
             // ALERT :: pseudo api calls
+            /*
             console.log('(request) client_storage :: ' + filename);
             console.log('(request) blobBase64 :: ' + base64data.substring(0, 121));
             console.log('(typeof) base64data :: ' + typeof base64data);
             console.log('(apicall) client_storage :: ' + post_storage_data);
             console.log('(apicall) process_exercise :: ' + post_data);
+            */
       }
 // ---------------- record exercise ends -----------------------
 
@@ -787,15 +789,25 @@ const defaultResNetMultiplier = 1.0;
 const defaultResNetStride = 32;
 const defaultResNetInputResolution = 250;
 
-const guiState = {
-  algorithm: 'single-pose',
-  input: {
-    architecture: 'MobileNetV1',                            // ALERT :: ResNet50 to MobileNetV1 - canging 4 variables
+const setMobileNet = {
+    architecture: 'MobileNetV1',
     outputStride: defaultMobileNetStride,
     inputResolution: defaultMobileNetInputResolution,
     multiplier: defaultMobileNetMultiplier,
     quantBytes: defaultQuantBytes
-  },
+}
+
+const setResNet = {
+  architecture: 'ResNet50',
+  outputStride: defaultResNetStride,
+  inputResolution: defaultResNetInputResolution,
+  multiplier: defaultResNetMultiplier,
+  quantBytes: defaultQuantBytes
+}
+
+const guiState = {
+  algorithm: 'single-pose',
+  input: setMobileNet,        // ALERT :: DEPLOT SHORTCUT - change to ResNet50 model
   singlePoseDetection: {
     minPoseConfidence: 0.1,
     minPartConfidence: 0.5,
