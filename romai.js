@@ -1,10 +1,80 @@
-// ===============================================================================
-//                      NEW TFJS SPEECH COMMAND RECOGNIZER
-// ===============================================================================
-let recognizer;
-let global_recognizer = '';
-let is_enabled = true;
+// ---------------- territory :: exercise completed (starts) -----------------------
+// chinToChest
+// lookCeiling
+// rightHandToShoulder
+// leftHandToShoulder
+// headToTopBend
+// ---------------- territory :: exercise completed (starts) -----------------------
 
+
+
+// ---------------- territory :: global variables (starts) -----------------------
+// voice recognition vars
+let recognizer;
+let voice_captured;
+let is_voice_recognizer_enabled = true;
+
+// recording vars
+let chunks = [];
+let if_record = true;
+let start_record = true;
+let mediaRecorder = 'not init';
+
+// api vars
+let patientId = uuidv4();
+let testId = 'TEST-01';
+let tenant = 'telemeddev';
+let height = 76;
+let exerciseName = '(none)';
+let continue_exercise = false;
+let exerciseMp3;
+let is_api_call = true;
+
+// color vars
+const red = '#d2222d';
+const yellow = '#ffbf00';
+const green = '#238823';
+const white = '#ffffff';
+const black = '#000000';
+let color = red;
+let boundingBoxColor = red;
+
+// draw vars
+const x_adjust = 21;        // pose adjustment threshold
+const y_adjust = 21;
+const lineWidth = 12;
+const pointRadius = 12;
+let posture;
+let is_posture_colorization = true;
+
+// voice vars
+let user_voice = 'noise';
+let noise_captured = 'noise';
+let is_voice = true;
+let welcome_mb = false;
+let beep_mb = false;
+let wrong_pose_mb = false;
+let completed_mb = false;
+
+// misc
+let is_start = false;
+let all_keys = 'NO KEYS YET';
+let frame_count = 1;
+let confidence_score = 0.1;
+let head_bool = false;
+let leg_bool = false;
+let curr_time = Date.now();
+let waiting_yes_time = Date.now();
+let yes_triggered = 99999;
+let interval = 10000;
+let checker;
+// ---------------- territory :: global variables (ends) -----------------------
+
+
+
+// ---------------- territory :: utility (starts) -----------------------
+
+// voice recognition utility
 function predictWord() {
     const words = recognizer.wordLabels();
     const threshold = 0.9;
@@ -19,104 +89,47 @@ function predictWord() {
         
         yes_score = scores[18].score;
         go_score = scores[6].score;
-        if (go_score > yes_score && go_score > threshold && time + time_th < Date.now())
+        if (is_voice_recognizer_enabled)
         {
-            time = Date.now();
-            global_recognizer = scores[6].word;
-            console.log('(predictWord) CAPTURED :: ' + global_recognizer);
-            score = go_score;
-        }
-        else if (go_score < yes_score && yes_score > threshold && time + time_th < Date.now())
-        {
-            time = Date.now();
-            global_recognizer = scores[18].word;
-            console.log('(predictWord) CAPTURED :: ' + global_recognizer);
-            score = yes_score;
+          if (go_score > yes_score && go_score > threshold && time + time_th < Date.now())
+          {
+              time = Date.now();
+              voice_captured = scores[6].word;
+              console.log('(predictWord) CAPTURED :: ' + voice_captured);
+              score = go_score;
+          }
+          else if (go_score < yes_score && yes_score > threshold && time + time_th < Date.now())
+          {
+              time = Date.now();
+              voice_captured = scores[18].word;
+              console.log('(predictWord) CAPTURED :: ' + voice_captured);
+              score = yes_score;
+          }
         }
     }, {probabilityThreshold: threshold});
 }
 
-async function voice_recognizer_app()
+async function voice_recognizer()
 {
     recognizer = speechCommands.create('BROWSER_FFT');
     await recognizer.ensureModelLoaded();
     predictWord();
 }
 
-voice_recognizer_app();
+// misc utility
+function uuidv4()
+{
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+}
 
 // blob to base64
 function readFile(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onerror = reject;
-        reader.onloadend = function() {resolve(reader.result); }
+        reader.onloadend = function() {resolve(reader.result);}
         reader.readAsDataURL(file);
     });
-}
-// ================================================================================
-
-// ================================================================================
-//                                API VARIABLES
-// ================================================================================
-let patientId = uuidv4();
-let testId = 'TEST-01';
-let tenant = 'telemeddev';
-let height = 76;
-let exerciseName = 'chinToChest';
-// ================================================================================
-
-const red = '#d2222d';
-const yellow = '#ffbf00';
-const green = '#238823';
-const white = '#ffffff';
-const black = '#000000';
-
-let color = red;
-let old_color = red;
-
-const boundingBoxColor = red;
-const lineWidth = 12;
-const pointRadius = 12;
-
-// for pose adjustment (threshold)
-const x_adjust = 21;
-const y_adjust = 21;
-
-let posture_bool = true;
-
-// mb :: message_bool
-let welcome_mb = false;
-let beep_mb = false;
-let wrong_pose_mb = false;
-let completed_mb = false;
-
-let all_keys = 'NO KEYS YET';
-
-let frame_count = 1;
-let confidence_score = 0.1;
-
-let head_bool = false;
-let leg_bool = false;
-
-let user_voice = 'noise';
-let noise_captured = 'noise';
-let if_voice = true;
-let if_im_voice = false;
-
-let curr_time = Date.now();
-let waiting_yes_time = Date.now();
-let yes_triggered = 99999;
-
-let interval = 10000;
-let checker = setInterval(checkPoint, interval);
-
-let mediaRecorder = 'not init';
-
-function uuidv4() {
-  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-  );
 }
 
 function resetTimer(new_interval)
@@ -125,73 +138,60 @@ function resetTimer(new_interval)
     {
         interval = new_interval;
         clearInterval(checker);
-        
         checker = setInterval(checkPoint, interval);
     }
 }
 
-let if_record = true;
-let start_record = true;
+function posture_colorization(keypoints, minConfidence)
+{
+    if (is_posture_colorization)
+    {
+        if (posture != 'sideface' && (exerciseName == 'chinToChest' || exerciseName == 'lookCeiling' || exerciseName == 'headToTopBend'))
+        { 
+            posture = 'sideface';
+            console.log('(draw) posture_colorization :: ' + posture);
+
+            var points = getPoints(keypoints);
+            var x = points[0];
+            var y = points[1];
+            
+            if ((Math.abs(x[5] - x[6]) < x_adjust*2) && (Math.abs(x[11] - x[12]) < x_adjust*2)) 
+                color = green;
+            else color = red;
+        }
+        else if (posture != 'frontface' && (exerciseName == 'rightHandToShoulder' || exerciseName == 'leftHandToShoulder'))
+        {
+            posture = 'frontface';
+            console.log('(draw) posture_colorization :: ' + posture);
+
+            res = fullBodyCheckConfCount(keypoints, minConfidence);
+            if (res > 15) color = green;
+            else color = red;
+        }
+    }
+}
+
 function recording()
 {
     if (if_record)
     {
-        if (user_voice === 'yes' && start_record)
+        if (user_voice === 'yes' && start_record && mediaRecorder.state === 'inactive')
         {
             mediaRecorder.start();
             console.log('RECORDING (starts) - state :: ' + mediaRecorder.state);
             start_record = false;
         }
-        else if (user_voice === 'go')
+        else if (user_voice === 'go' && mediaRecorder.state === 'recording')
         {
             if_record = false;
             mediaRecorder.stop();
             console.log('RECORDING (finished) - state ::', mediaRecorder.state);
+            user_voice = 'noise';
         }
     }
     else 
     {
         // console.log('(bool) if_record :: ', if_record);
-    }
-}
-
-function retreat()
-{
-    clearInterval(checker);
-    window.user_voice_captured = function() {};
-    // throw new Error('PROGRAM TERMINATING...');
-}
-
-/*
- * for routine check of face & then full body
- */
-function checkPoint()
-{
-    if (all_keys === 'NO KEYS YET')
-    {
-        console.log('Where are you?');
-    }
-    else
-    {
-        head_bool = check_head(all_keys);
-        leg_bool = check_leg(all_keys);
-        
-        console.log("triggering checkPoint @ " + (Date.now() - curr_time));
-        curr_time = Date.now();
-        
-        if_voice = true;
-        if (!head_bool)
-        {
-            user_voice = 'noise';
-            play_audio('./voice/face_negative.mp3', "(negative) face");
-            resetTimer(7000);
-        }
-        else if (!leg_bool)
-        {
-            user_voice = 'noise';
-            play_audio('./voice/full_body_negative.mp3', "(negative) full body");
-            resetTimer(7000);
-        }
     }
 }
 
@@ -207,30 +207,19 @@ function play_audio_once(audio_dir, bool, message)
     return bool;
 }
 
-function play_im_audio(audio_dir, message)
-{
-    if (if_im_voice)
-    {
-        var audio = new Audio(audio_dir);
-        audio.play();
-        console.log(message);
-    }
-}
-
 function play_audio(audio_dir, message)
 {
-    if (if_voice)
+    if (is_voice)
     {
         var audio = new Audio(audio_dir);
         audio.play();
         console.log(message);
     }
 }
-
 
 function check_head(keypoints)
 {
-  if (keypoints[1].score < confidence_score || keypoints[2].score < confidence_score || keypoints[3].score < confidence_score || keypoints[4].score < confidence_score)
+  if (keypoints[0].score < confidence_score && keypoints[1].score < confidence_score && keypoints[2].score < confidence_score && keypoints[3].score < confidence_score && keypoints[4].score < confidence_score)
       return false;
   else
       return true;
@@ -238,52 +227,84 @@ function check_head(keypoints)
 
 function check_leg(keypoints)
 {
-  // if (keypoints[3].score < confidence_score) // surreal
-  if (keypoints[15].score < confidence_score || keypoints[16].score < confidence_score)     // SHORTCUT ALERT
+  // if (keypoints[0].score < confidence_score) // surreal
+  if (keypoints[15].score < confidence_score && keypoints[16].score < confidence_score)     // ALERT :: TEST SHORTCUT
       return false;
   else
       return true;
 }
 
+/*
+ * for routine check of face & then full body
+ */
+function checkPoint()
+{
 
-/* OVERLAPPING ISSUE
-NO FULL BODY & SAY YES OVERLAPPING!
-full body captured => YES
-(assigned) CAPTURED USER_VOICE :: yes at time :: 241
-triggering checkPoint...15195
-#### YES TIMEOUT #### :: 10148
-full body captured => YES
-triggering checkPoint...14978
-LEG BOOL VOICE ::  noise
-can not see full body
-*/
+    if (all_keys === 'NO KEYS YET')
+    {
+        console.log('Loading PoseNet & speech-command model...');
+    }
+    else
+    {
+        head_bool = check_head(all_keys);
+        leg_bool = check_leg(all_keys);
+        
+        console.log("(checkpoint) triggering checkPoint @ " + (Date.now() - curr_time));
+        curr_time = Date.now();
+        
+        is_voice = true;
+        if (!head_bool)
+        {
+            user_voice = 'noise';
+            if (mediaRecorder.state === 'recording')
+            {
+              is_api_call = false;
+              mediaRecorder.stop();
+              console.log('RECORDING (deleted) - state :: ', mediaRecorder.state);
+            }
+            play_audio('./voice/face_negative.mp3', "(voice) negative - face");
+            resetTimer(7000);
 
-let chunks = [];
-function user_voice_captured() 
+        }
+        else if (!leg_bool)
+        {
+            user_voice = 'noise';
+            play_audio('./voice/full_body_negative.mp3', "(voice) negative - full body");
+            resetTimer(7000);
+        }
+    }
+}
+
+function check_userVoice()
 {    
-    if ((waiting_yes_time + 20000) < Date.now() && user_voice === 'yes') 
+    is_api_call = true;
+    // (clarification) user_voice !== 'go' in 20 sec
+    if ((waiting_yes_time + 20000) < Date.now() && user_voice === 'yes')  // ISSUE OVERLAPPING
     {
         user_voice = 'noise';
         console.log('#### YES TIMEOUT #### :: ' + (Date.now() - waiting_yes_time));
         beep_mb = false;
         wrong_pose_mb = false;
         completed_mb = false;
-        
-        mediaRecorder.stop();
-        chunks = [];        
-        console.log('RECORDING (deleted) - state ::', mediaRecorder.state);
+
+        if (mediaRecorder.state === 'recording')
+        {
+          is_api_call = false;
+          mediaRecorder.stop();
+          console.log('RECORDING (deleted) - state :: ', mediaRecorder.state);
+        }
     }
     
-    if (global_recognizer !== user_voice)
+    if (voice_captured !== user_voice)
     {
-        if ((global_recognizer === 'yes' || global_recognizer === 'go') && user_voice !== global_recognizer) 
+        if ((voice_captured === 'yes' || voice_captured === 'go') && user_voice !== voice_captured) 
         {
             yes_triggered = Date.now() - waiting_yes_time;
             waiting_yes_time = Date.now();
             
-            user_voice = global_recognizer;
+            user_voice = voice_captured;
             console.log('(assigned) CAPTURED USER_VOICE :: ' + user_voice);
-            global_recognizer = '';
+            voice_captured = '';
             
             if (user_voice === 'yes') if_record = true;
             
@@ -291,27 +312,99 @@ function user_voice_captured()
             /*
             if (yes_triggered < 5000)
             {
-                user_voice = global_recognizer;
+                user_voice = voice_captured;
                 console.log('(assigned) CAPTURED USER_VOICE :: ' + user_voice + ' at time :: ' + yes_triggered);
-                global_recognizer = 'noise';
+                voice_captured = 'noise';
             }
             else
             {
-                console.log('(not assigned) CAPTURE TIMEOUT :: ' + global_recognizer + ' at time :: ' + yes_triggered);
+                console.log('(not assigned) CAPTURE TIMEOUT :: ' + voice_captured + ' at time :: ' + yes_triggered);
             }
             */
 
         }
-        else if (noise_captured !== global_recognizer && (global_recognizer !== 'yes' || global_recognizer !== 'go'))
+        else if (noise_captured !== voice_captured && (voice_captured !== 'yes' || voice_captured !== 'go'))
         {
-            noise_captured = global_recognizer;
+            noise_captured = voice_captured;
             console.log('(not assigned) CAPTURED NOISE :: ' + noise_captured);
         }
     }
 }
+// ---------------- territory :: utility (ends) -----------------------
+
+
+// ---------------- territory :: jQuery - buttons & dropdown (starts) -----------------------
+$(document).ready(function(){
+    
+$("#start" ).on('click', function()
+{
+    if (!is_start)
+    {
+        is_start = true;
+        is_voice_recognizer_enabled = true;
+        voice_recognizer();
+        checker = setInterval(checkPoint, interval);
+        // ALERT :: TEST SHORTCUT - semi/welcome
+        play_audio('voice/semi/welcome.mp3', '(voice) Welcome to mmh. Select an exercise from dropdown menu.');
+    }
+    else
+    {
+        console.log('(bool) is_start :: ' + is_start);
+    }
+})
+
+$("#stop" ).on('click', function()
+{
+    if (is_start)
+    {
+        is_start = false;
+        is_voice = true;
+        play_audio('voice/semi/terminate.mp3', '(voice) Program terminating...')
+        clearInterval(checker);
+        if (is_voice_recognizer_enabled) 
+        {
+            is_voice_recognizer_enabled = false;
+            console.log('(voice_recognizer) :: DISABLED');
+        }
+    }
+    else
+    {
+        console.log('(bool) is_start :: ' + is_start);
+        // play_audio('voice/semi/start-again.mp3', '(voice) Program is terminated. Please start the program.')
+    }
+})
+
+$("#select" ).on('change', function()
+{
+  console.log('(bool) is_start :: ', is_start);
+    if (is_start)
+    {
+        var temp_exerciseName = $(this).val();
+        if (temp_exerciseName !== '(none)')
+        {
+            exerciseName = temp_exerciseName;
+            exerciseMp3 = 'voice/semi/' + exerciseName + '.mp3';
+            console.log('(dropdown)', exerciseName);
+            continue_exercise = true;
+            checkPoint();
+        }
+        else
+        {
+            console.log('Invalid exercise.')
+        }
+    }
+    else
+    {
+        console.log('Program is not started or terminated...')
+    }
+})});
+// ---------------- territory :: jQuery - buttons & dropdown (ends) -----------------------
+
+
+
 
 // ========================================================================================================
-//                                            data_util.js
+//                                            file :: data_util.js
 // ========================================================================================================
 
 function isNumeric(num){
@@ -366,50 +459,6 @@ function getPoints(keypoints)
   return [x, y];
 }
 
-function front_straight(keypoints, x_adjust, y_adjust)
-{
-  var points = getPoints(keypoints);
-  var x = points[0];
-  var y = points[1];
-    
-  console.log("FALSE");
-  old_color = red;
-  if (Math.abs(y[1] - y[2]) < y_adjust && 
-      Math.abs(y[3] - y[4]) < y_adjust &&
-      Math.abs(y[5] - y[6]) < y_adjust &&
-      Math.abs(y[11] - y[12]) < y_adjust*3 &&
-      y[9] > y[7] && y[10] > y[8] &&
-      
-      Math.abs(x[5] - x[7]) < x_adjust && 
-      Math.abs(x[7] - x[9]) < x_adjust &&
-      Math.abs(x[6] - x[8]) < x_adjust &&
-      Math.abs(x[8] - x[10]) < x_adjust &&
-
-      Math.abs(x[11] - x[13]) < x_adjust && 
-      Math.abs(x[13] - x[15]) < x_adjust &&
-      Math.abs(x[12] - x[14]) < x_adjust &&
-      Math.abs(x[14] - x[16]) < x_adjust) 
-      {
-        console.log("TRUE");
-        old_color = black;
-      }
-}
-
-function side_straight(x_s, y_s, x_adjust, y_adjust) 
-{
-  var flag = false;
-  if (Math.abs(x[5] - x[6]) < x_adjust && 
-      Math.abs(y[5] - y[6]) < y_adjust &&
-      Math.abs(x[11] - x[12]) < x_adjust && 
-      Math.abs(y[11] - y[12]) < y_adjust) 
-      {
-        flag = true;
-        if (x[0] < x[6]) console.log("FRONT");
-        if (x[0] > x[5]) console.log("BACK");
-      }
-  return flag;
-}
-
 function posture_right_hands_up(keypoints)
 {
     var points = getPoints(keypoints);
@@ -440,16 +489,13 @@ function posture_both_hands_up(keypoints)
     
     if (y[10] < y[8] && y[9] < y[7]) 
     {
-        color = yellow;
         return true;
     }
     else
     {
-        color = black;
         return false;
     }
 }
-
 
 function head_tilt(x_s, y_s, x_adjust, y_adjust)
 {
@@ -477,62 +523,20 @@ function keypoint_scores(keypoints) {
   return conf;
 }
 
-
-/**
- * Draw pose keypoints onto a canvas
- */
-
-let posture = "frontface";
-
 function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
+    
+    posture_colorization(keypoints, minConfidence);
+  
+    for (let i = 0; i < keypoints.length; i++) {
+        const keypoint = keypoints[i];
 
-  /*
-   * POSTURE-WISE COLOR CHANGE
-  switch (posture)
-  {
-    case "frontface":
-      if(front_straight(x_s, y_s, x_adjust, y_adjust)) color = green;
-      else color = red;
-      break;
-    case "sideface":
-      if(side_straight(x_s, y_s, x_adjust, y_adjust)) color = green;
-      else color = red;
-      break;
-  }
-  */
-  
-  /* POSTURE COLORIZATION :: FULL BODY CHECK
-  if (posture_bool)
-  {
-    res = fullBodyCheckConfCount(keypoints, minConfidence);
-    if (res > 15) color = green;
-    else color = red;
-  }
-  */
-  
-  // POSTURE COLORIZATION :: SIDE FACE              // NEW DEFINITION ALERT
-    if (posture_bool)
-    {
-        var points = getPoints(keypoints);
-        var x = points[0];
-        var y = points[1];
-        
-        if ((Math.abs(x[5] - x[6]) < x_adjust*2) && (Math.abs(x[11] - x[12]) < x_adjust*2)) 
-            color = green;
-        else color = red;
+        if (keypoint.score < minConfidence) {
+            continue;
+        }
+
+        const {y, x} = keypoint.position;
+        drawPoint(ctx, y * scale, x * scale, pointRadius, color);
     }
-
-  
-  for (let i = 0; i < keypoints.length; i++) {
-    const keypoint = keypoints[i];
-
-    if (keypoint.score < minConfidence) {
-      continue;
-    }
-
-    const {y, x} = keypoint.position;
-    drawPoint(ctx, y * scale, x * scale, pointRadius, color);
-  }
 }
 
 /**
@@ -551,10 +555,6 @@ function drawBoundingBox(keypoints, ctx) {
   ctx.stroke();
 }
 
-const tryResNetButtonName = 'tryResNetButton';
-const tryResNetButtonText = '[New] Try ResNet50';
-const tryResNetButtonTextCss = 'width:100%;text-decoration:underline;';
-const tryResNetButtonBackgroundCss = 'background:#e61d5f;';
 
 function isAndroid() {
   return /Android/i.test(navigator.userAgent);
@@ -566,25 +566,6 @@ function isiOS() {
 
 function isMobile() {
   return isAndroid() || isiOS();
-}
-
-function setDatGuiPropertyCss(propertyText, liCssString, spanCssString = '') {
-  var spans = document.getElementsByClassName('property-name');
-  for (var i = 0; i < spans.length; i++) {
-    var text = spans[i].textContent || spans[i].innerText;
-    if (text == propertyText) {
-      spans[i].parentNode.parentNode.style = liCssString;
-      if (spanCssString !== '') {
-        spans[i].style = spanCssString;
-      }
-    }
-  }
-}
-
-function updateTryResNetButtonDatGuiCss() {
-  setDatGuiPropertyCss(
-      tryResNetButtonText, tryResNetButtonBackgroundCss,
-      tryResNetButtonTextCss);
 }
 
 /**
@@ -601,38 +582,40 @@ function toggleLoadingUI(
   }
 }
 
+// ISSUE :: NO USE
 /**
  * Converts an arary of pixel data into an ImageData object
  */
-async function renderToCanvas(a, ctx) {
-  const [height, width] = a.shape;
-  const imageData = new ImageData(width, height);
-
-  const data = await a.data();
-
-  for (let i = 0; i < height * width; ++i) {
-    const j = i * 4;
-    const k = i * 3;
-
-    imageData.data[j + 0] = data[k + 0];
-    imageData.data[j + 1] = data[k + 1];
-    imageData.data[j + 2] = data[k + 2];
-    imageData.data[j + 3] = 255;
-  }
-
-  ctx.putImageData(imageData, 0, 0);
-}
+// async function renderToCanvas(a, ctx) {
+//   const [height, width] = a.shape;
+//   const imageData = new ImageData(width, height);
+// 
+//   const data = await a.data();
+// 
+//   for (let i = 0; i < height * width; ++i) {
+//     const j = i * 4;
+//     const k = i * 3;
+// 
+//     imageData.data[j + 0] = data[k + 0];
+//     imageData.data[j + 1] = data[k + 1];
+//     imageData.data[j + 2] = data[k + 2];
+//     imageData.data[j + 3] = 255;
+//   }
+// 
+//   ctx.putImageData(imageData, 0, 0);
+// }
 
 /**
  * Draw an image on a canvas
  */
-function renderImageToCanvas(image, size, canvas) {
-  canvas.width = size[0];
-  canvas.height = size[1];
-  const ctx = canvas.getContext('2d');
+// function renderImageToCanvas(image, size, canvas) {
+//   canvas.width = size[0];
+//   canvas.height = size[1];
+//   const ctx = canvas.getContext('2d');
+// 
+//   ctx.drawImage(image, 0, 0);
+// }
 
-  ctx.drawImage(image, 0, 0);
-}
 
 /**
  * Draw heatmap values, one of the model outputs, on to the canvas
@@ -692,7 +675,7 @@ function drawOffsetVectors(
 }
 
 // ========================================================================================================
-//                                        camera.js
+//                                             file :: camera.js
 // ========================================================================================================
 
 const videoWidth = 480;
@@ -718,7 +701,8 @@ async function setupCamera() {
   navigator.mediaDevices.getUserMedia(constraintObj).then(function(mediaStreamObj) {
       video.srcObject = mediaStreamObj;
       
-// ---------------- record exercise starts -----------------------
+// ---------------- territory :: record exercise (starts) -----------------------
+      
       mediaRecorder = new MediaRecorder(mediaStreamObj);
       
       mediaRecorder.ondataavailable = function(ev) {
@@ -726,7 +710,11 @@ async function setupCamera() {
       }
       
       mediaRecorder.onstop = async function(ev) {
+        if (is_api_call)
+        {
+          // debug
           const blob = new Blob(chunks, {'type':'video/mp4;'}); chunks = [];
+
           const blobVideoURL = window.URL.createObjectURL(blob);
           const filename = patientId + '-' + exerciseName + '-clientRaw.mp4'
           const rawVideoUrl = 'https://romai.injurycloud.com/client_storage/' + filename
@@ -761,6 +749,7 @@ async function setupCamera() {
               body: JSON.stringify(data)
           };
           
+            // ALERT :: TEST SHORTCUT :: api calls
             console.log('(request) client_storage :: ' + filename);
             console.log('(request) blobBase64 :: ' + base64data.substring(0, 121));
             console.log('(typeof) base64data :: ' + typeof base64data);
@@ -768,10 +757,23 @@ async function setupCamera() {
                 .then(response => response.json())
                 .then(responseJSON => {console.log('(response) client_storage :: ', responseJSON)})
                 .then(fetch('https://romai.injurycloud.com/process_exercise/', post_data)
-                          .then(response => response.json())
-                          .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)}));
+                            .then(response => response.json())
+                            .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)}));
+            
+            
+            // psuedo api calls
+            // console.log('(request) client_storage :: ' + filename);
+            // console.log(base64data);
+            // console.log('(apicall) client_storage :: ' + post_storage_data);
+            // console.log('(apicall) process_exercise :: ' + post_data);
       }
-// ---------------- record exercise ends -----------------------
+      else 
+      {
+        // debug
+        chunks = [];
+      }
+    }
+// ---------------- territory :: record exercise (ends) -----------------------
 
       
   }).catch(function(err) {
@@ -788,7 +790,6 @@ async function setupCamera() {
 async function loadVideo() {
   const video = await setupCamera();
   video.play();
-  
   return video;
 }
 
@@ -802,15 +803,25 @@ const defaultResNetMultiplier = 1.0;
 const defaultResNetStride = 32;
 const defaultResNetInputResolution = 250;
 
+const setMobileNet = {
+    architecture: 'MobileNetV1',
+    outputStride: defaultMobileNetStride,
+    inputResolution: defaultMobileNetInputResolution,
+    multiplier: defaultMobileNetMultiplier,
+    quantBytes: defaultQuantBytes
+}
+
+const setResNet = {
+  architecture: 'ResNet50',
+  outputStride: defaultResNetStride,
+  inputResolution: defaultResNetInputResolution,
+  multiplier: defaultResNetMultiplier,
+  quantBytes: defaultQuantBytes
+}
+
 const guiState = {
   algorithm: 'single-pose',
-  input: {
-    architecture: 'ResNet50',
-    outputStride: defaultResNetStride,
-    inputResolution: defaultResNetInputResolution,
-    multiplier: defaultResNetMultiplier,
-    quantBytes: defaultQuantBytes
-  },
+  input: setMobileNet,        // ALERT :: DEPLOT SHORTCUT - change to ResNet50 model
   singlePoseDetection: {
     minPoseConfidence: 0.1,
     minPartConfidence: 0.5,
@@ -839,171 +850,7 @@ function setupGui(cameras, net) {
   if (cameras.length > 0) {
     guiState.camera = cameras[0].deviceId;
   }
-
-  const gui = new dat.GUI({width: 300});
-
-  let architectureController = null;
-  guiState[tryResNetButtonName] = function() {
-    architectureController.setValue('ResNet50')
-  };
-  gui.add(guiState, tryResNetButtonName).name(tryResNetButtonText);
-  updateTryResNetButtonDatGuiCss();
-
-  // The single-pose algorithm is faster and simpler but requires only one
-  // person to be in the frame or results will be innaccurate. Multi-pose works
-  // for more than 1 person
-  const algorithmController =
-      gui.add(guiState, 'algorithm', ['single-pose', 'multi-pose']);
-
-  // The input parameters have the most effect on accuracy and speed of the
-  // network
-  let input = gui.addFolder('Input');
-  // Architecture: there are a few PoseNet models varying in size and
-  // accuracy. 1.01 is the largest, but will be the slowest. 0.50 is the
-  // fastest, but least accurate.
-  architectureController =
-      input.add(guiState.input, 'architecture', ['MobileNetV1', 'ResNet50']);
-  guiState.architecture = guiState.input.architecture;
-  // Input resolution:  Internally, this parameter affects the height and width
-  // of the layers in the neural network. The higher the value of the input
-  // resolution the better the accuracy but slower the speed.
-  let inputResolutionController = null;
-  function updateGuiInputResolution(
-      inputResolution,
-      inputResolutionArray,
-  ) {
-    if (inputResolutionController) {
-      inputResolutionController.remove();
-    }
-    guiState.inputResolution = inputResolution;
-    guiState.input.inputResolution = inputResolution;
-    inputResolutionController =
-        input.add(guiState.input, 'inputResolution', inputResolutionArray);
-    inputResolutionController.onChange(function(inputResolution) {
-      guiState.changeToInputResolution = inputResolution;
-    });
-  }
-
-  // Output stride:  Internally, this parameter affects the height and width of
-  // the layers in the neural network. The lower the value of the output stride
-  // the higher the accuracy but slower the speed, the higher the value the
-  // faster the speed but lower the accuracy.
-  let outputStrideController = null;
-  function updateGuiOutputStride(outputStride, outputStrideArray) {
-    if (outputStrideController) {
-      outputStrideController.remove();
-    }
-    guiState.outputStride = outputStride;
-    guiState.input.outputStride = outputStride;
-    outputStrideController =
-        input.add(guiState.input, 'outputStride', outputStrideArray);
-    outputStrideController.onChange(function(outputStride) {
-      guiState.changeToOutputStride = outputStride;
-    });
-  }
-
-  // Multiplier: this parameter affects the number of feature map channels in
-  // the MobileNet. The higher the value, the higher the accuracy but slower the
-  // speed, the lower the value the faster the speed but lower the accuracy.
-  let multiplierController = null;
-  function updateGuiMultiplier(multiplier, multiplierArray) {
-    if (multiplierController) {
-      multiplierController.remove();
-    }
-    guiState.multiplier = multiplier;
-    guiState.input.multiplier = multiplier;
-    multiplierController =
-        input.add(guiState.input, 'multiplier', multiplierArray);
-    multiplierController.onChange(function(multiplier) {
-      guiState.changeToMultiplier = multiplier;
-    });
-  }
-
-  // QuantBytes: this parameter affects weight quantization in the ResNet50
-  // model. The available options are 1 byte, 2 bytes, and 4 bytes. The higher
-  // the value, the larger the model size and thus the longer the loading time,
-  // the lower the value, the shorter the loading time but lower the accuracy.
-  let quantBytesController = null;
-  function updateGuiQuantBytes(quantBytes, quantBytesArray) {
-    if (quantBytesController) {
-      quantBytesController.remove();
-    }
-    guiState.quantBytes = +quantBytes;
-    guiState.input.quantBytes = +quantBytes;
-    quantBytesController =
-        input.add(guiState.input, 'quantBytes', quantBytesArray);
-    quantBytesController.onChange(function(quantBytes) {
-      guiState.changeToQuantBytes = +quantBytes;
-    });
-  }
-
-  function updateGui() {
-    if (guiState.input.architecture === 'MobileNetV1') {
-      updateGuiInputResolution(
-          defaultMobileNetInputResolution,
-          [200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800]);
-      updateGuiOutputStride(defaultMobileNetStride, [8, 16]);
-      updateGuiMultiplier(defaultMobileNetMultiplier, [0.50, 0.75, 1.0]);
-    } else {  // guiState.input.architecture === "ResNet50"
-      updateGuiInputResolution(
-          defaultResNetInputResolution,
-          [200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800]);
-      updateGuiOutputStride(defaultResNetStride, [32, 16]);
-      updateGuiMultiplier(defaultResNetMultiplier, [1.0]);
-    }
-    updateGuiQuantBytes(defaultQuantBytes, [1, 2, 4]);
-  }
-
-  updateGui();
-  input.open();
-  // Pose confidence: the overall confidence in the estimation of a person's
-  // pose (i.e. a person detected in a frame)
-  // Min part confidence: the confidence that a particular estimated keypoint
-  // position is accurate (i.e. the elbow's position)
-  let single = gui.addFolder('Single Pose Detection');
-  single.add(guiState.singlePoseDetection, 'minPoseConfidence', 0.0, 1.0);
-  single.add(guiState.singlePoseDetection, 'minPartConfidence', 0.0, 1.0);
-
-  let multi = gui.addFolder('Multi Pose Detection');
-  multi.add(guiState.multiPoseDetection, 'maxPoseDetections')
-      .min(1)
-      .max(20)
-      .step(1);
-  multi.add(guiState.multiPoseDetection, 'minPoseConfidence', 0.0, 1.0);
-  multi.add(guiState.multiPoseDetection, 'minPartConfidence', 0.0, 1.0);
-  // nms Radius: controls the minimum distance between poses that are returned
-  // defaults to 20, which is probably fine for most use cases
-  multi.add(guiState.multiPoseDetection, 'nmsRadius').min(0.0).max(40.0);
-  multi.open();
-
-  let output = gui.addFolder('Output');
-  output.add(guiState.output, 'showVideo');
-  output.add(guiState.output, 'showSkeleton');
-  output.add(guiState.output, 'showPoints');
-  output.add(guiState.output, 'showBoundingBox');
-  output.open();
-
-
-  architectureController.onChange(function(architecture) {
-    // if architecture is ResNet50, then show ResNet50 options
-    updateGui();
-    guiState.changeToArchitecture = architecture;
-  });
-
-  algorithmController.onChange(function(value) {
-    switch (guiState.algorithm) {
-      case 'single-pose':
-        multi.close();
-        single.open();
-        break;
-      case 'multi-pose':
-        single.close();
-        multi.open();
-        break;
-    }
-  });
 }
-
 
 /**
  * Feeds an image to posenet to estimate poses - this is where the magic
@@ -1161,69 +1008,66 @@ function detectPoseInRealTime(video, net) {
         }
       }
       
-// ======================================================================================================================================
+// ---------------- territory :: full body check (starts) -----------------------
         frame_count = frame_count + 1;
-        welcome_mb = play_audio_once('./voice/welcome.mp3', welcome_mb, 'welcome to my medical hub');
-        
-        user_voice_captured();
-        
-        if (head_bool && leg_bool && user_voice !== 'yes' && user_voice !== 'go')
+        check_userVoice();
+
+        if (head_bool && leg_bool && user_voice !== 'yes' && user_voice !== 'go' && continue_exercise)
         {
-            play_audio('./voice/fullbodyPos_chin2chestStart.mp3', 'full body captured => YES'); resetTimer(20000); // SHORTCUT ALERT
-            // play_audio('./voice/say_yes.mp3', ''); resetTimer(5000);
-            if_voice = false;
+            // ALERT :: TEST SHORTCUT
+            play_audio(exerciseMp3, '(voice) ' + exerciseName + ' starting...'); resetTimer(21000);
+            // play_audio('./voice/say_yes.mp3', '(voice) say yes'); resetTimer(5000);
+            
+            is_voice = false;
             beep_mb = false;
             wrong_pose_mb = false;
             completed_mb = false;
             start_record = true;
             waiting_yes_time = Date.now();
             
-            if (!is_enabled)
-            {
-                async function voice_recognizer_app()
-                {
-                    recognizer = speechCommands.create('BROWSER_FFT');
-                    await recognizer.ensureModelLoaded();
-                    predictWord();
-                }
-                
-                is_enabled = true;
-                voice_recognizer_app();
-                console.log('ENABLED :: voice_recognizer_app');
+            if (!is_voice_recognizer_enabled)
+            {   
+                is_voice_recognizer_enabled = true;
+                console.log('(voice_recognizer) :: ENABLED');
             }
         }
-        else if (head_bool && leg_bool && user_voice === 'yes')
+        else if (head_bool && leg_bool && user_voice === 'yes' && continue_exercise)
         {
-            // pose_bool = posture_right_hands_up(keypoints); // SHORTCUT ALERT
+            // pose_bool = posture_right_hands_up(keypoints); // ALERT :: FUTURE DECISION SHORTCUT
             pose_bool = true;
-            if_voice = false;
+            is_voice = false;
             if (pose_bool)
             {
-                beep_mb = play_audio_once('./voice/finish_go_beep.mp3', beep_mb, 'finish go beep');
+                beep_mb = play_audio_once('./voice/finish_go_beep.mp3', beep_mb, '(voice) finish go beep');
                 setTimeout(recording, 6500);
             }
             else
             {
-                wrong_pose_mb = play_audio_once('./voice/wrong_pose.mp3', wrong_pose_mb, 'wrong pose');
+                wrong_pose_mb = play_audio_once('./voice/wrong_pose.mp3', wrong_pose_mb, '(voice) wrong pose');
             }
         }
-        else if (head_bool && leg_bool && user_voice === 'go')
+        else if (head_bool && leg_bool && user_voice === 'go' && continue_exercise)
         {
-            if_voice = false;
-            completed_mb = play_audio_once('./voice/successfully_completed.mp3', completed_mb, 'exercise completed');
-            retreat();
+            continue_exercise = false;
+            completed_mb = play_audio_once('./voice/semi/completed-continue-or-terminate.mp3', completed_mb, '(voice) exercise completed');
+            
+            if (is_voice_recognizer_enabled) 
+            {
+                is_voice_recognizer_enabled = false;
+                console.log('(voice_recognizer) :: DISABLED');
+            }
+            checkPoint();
         }
         else
         {
-            // disabling voice_recognizer
-            if (is_enabled) 
+            // continue_exercise = false
+            if (is_voice_recognizer_enabled) 
             {
-                is_enabled = false;
-                window.voice_recognizer_app = function() {};
-                console.log('DISABLED :: voice_recognizer_app');
+                is_voice_recognizer_enabled = false;
+                console.log('(voice_recognizer) :: DISABLED');
             }
         }
-// ======================================================================================================================================
+// ---------------- territory :: full body check (ends) -----------------------
     });
 
     requestAnimationFrame(poseDetectionFrame);
@@ -1231,6 +1075,7 @@ function detectPoseInRealTime(video, net) {
 
   poseDetectionFrame();
 }
+
 
 /**
  * Kicks off the demo by loading the posenet model, finding and loading
@@ -1253,8 +1098,7 @@ async function bindPage() {
     video = await loadVideo();
   } catch (e) {
     let info = document.getElementById('info');
-    info.textContent = 'this browser does not support video capture,' +
-        'or this device does not have a camera';
+    info.textContent = 'this browser does not support video capture, or this device does not have a camera';
     info.style.display = 'block';
     throw e;
   }
@@ -1265,5 +1109,5 @@ async function bindPage() {
 
 navigator.getUserMedia = navigator.getUserMedia ||
     navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-// kick off the demo
+
 bindPage();
