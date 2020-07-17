@@ -7,7 +7,7 @@ let is_enabled = true;
 
 function predictWord() {
     const words = recognizer.wordLabels();
-    const threshold = 0.9;
+    const threshold = 0.97;
     var score = -1;
     var yes_score = -1;
     var stop_score = -1;
@@ -52,7 +52,7 @@ voice_recognizer_app();
 // ================================================================================
 //                                API VARIABLES
 // ================================================================================
-let patientId = uuidv4();
+let patientId = uuidv4();   // ALERT TEST
 let testId = 'TEST-01';
 let tenant = 'telemeddev';
 let height = 76;
@@ -288,7 +288,7 @@ function check_head(keypoints)
 
 function check_leg(keypoints)
 {
-  // if (keypoints[0].score < confidence_score) // surreal
+  // if (keypoints[3].score < confidence_score) // surreal
   if (keypoints[15].score < confidence_score && keypoints[16].score < confidence_score)     // SHORTCUT ALERT
       return false;
   else

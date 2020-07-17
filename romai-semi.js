@@ -21,7 +21,7 @@ let start_record = true;
 let mediaRecorder = 'not init';
 
 // api vars
-let patientId = uuidv4();
+let patientId = uuidv4();   // ALERT TEST
 let testId = 'TEST-01';
 let tenant = 'telemeddev';
 let height = 76;
@@ -37,7 +37,7 @@ function queue_api_call() {
       .then(function(data) {let queue = data.queue; if(queue.length){queue.forEach(print_queue)}})
       .catch(function(error) {console.log(error)});
 }
-const queue_checker = setInterval(queue_api_call, 5000);
+const queue_checker = setInterval(queue_api_call, 5000);    // ALERT TEST
 
 // color vars
 const red = '#d2222d';
@@ -85,42 +85,40 @@ let checker;
 
 // queue_api :: printing result
 function print_queue(item, index) {
-  if(!queue_result.includes(item.exerciseName))
+  if(!queue_result.includes(item.exerciseName) && item.status === "completed")
   {
       console.log('(api) queue :: new exercise -', item.exerciseName);
       queue_result.push(item.exerciseName);
-      if (item.status === "completed") {
-          var queue = document.getElementById("queue");
-          
-          var a1 = document.createElement('a');
-          var a2 = document.createElement('a');
-          var a3 = document.createElement('a');
-          var br = document.createElement('br');
-          
-          var link1 = document.createTextNode("raw_video");
-          var link2 = document.createTextNode("rendered_picture");
-          var link3 = document.createTextNode("rendered_video");
-          
-          a1.appendChild(link1);
-          a1.title = "raw_video";  
-          a1.href = "https://romai.injurycloud.com/" + item.request_output.raw_video;
+      var queue = document.getElementById("queue");
+      
+      var a1 = document.createElement('a');
+      var a2 = document.createElement('a');
+      var a3 = document.createElement('a');
+      var br = document.createElement('br');
+      
+      var link1 = document.createTextNode("raw_video");
+      var link2 = document.createTextNode("rendered_picture");
+      var link3 = document.createTextNode("rendered_video");
+      
+      a1.appendChild(link1);
+      a1.title = "raw_video";  
+      a1.href = "https://romai.injurycloud.com/" + item.request_output.raw_video;
 
-          a2.appendChild(link2);
-          a2.title = "rendered_picture";  
-          a2.href = "https://romai.injurycloud.com/" + item.request_output.rendered_picture;
-          
-          a3.appendChild(link3);
-          a3.title = "rendered_video";  
-          a3.href = "https://romai.injurycloud.com/" + item.request_output.rendered_video;
-          
-          queue.appendChild(document.createTextNode(item.exerciseName + " :: "));
-          queue.appendChild(a1);
-          queue.appendChild(document.createTextNode(" - "));
-          queue.appendChild(a2);
-          queue.appendChild(document.createTextNode(" - "));
-          queue.appendChild(a3);
-          queue.appendChild(br);
-      }
+      a2.appendChild(link2);
+      a2.title = "rendered_picture";  
+      a2.href = "https://romai.injurycloud.com/" + item.request_output.rendered_picture;
+      
+      a3.appendChild(link3);
+      a3.title = "rendered_video";  
+      a3.href = "https://romai.injurycloud.com/" + item.request_output.rendered_video;
+      
+      queue.appendChild(document.createTextNode(item.exerciseName + " :: "));
+      queue.appendChild(a1);
+      queue.appendChild(document.createTextNode(" - "));
+      queue.appendChild(a2);
+      queue.appendChild(document.createTextNode(" - "));
+      queue.appendChild(a3);
+      queue.appendChild(br);
   }
   else
   {
@@ -131,7 +129,7 @@ function print_queue(item, index) {
 // voice recognition utility
 function predictWord() {
     const words = recognizer.wordLabels();
-    const threshold = 0.9;
+    const threshold = 0.97;
     var score = -1;
     var yes_score = -1;
     var stop_score = -1;
@@ -170,8 +168,11 @@ async function voice_recognizer()
 {
     recognizer = speechCommands.create('BROWSER_FFT');
     await recognizer.ensureModelLoaded();
-    predictWord();
+    predictWord()
 }
+voice_recognizer()
+
+// debug
 
 // misc utility
 function uuidv4()
@@ -284,16 +285,17 @@ function check_head(keypoints)
 
 function check_leg(keypoints)
 {
-  // if (keypoints[0].score < confidence_score) // surreal
-  if (keypoints[15].score < confidence_score && keypoints[16].score < confidence_score)     // ALERT :: TEST SHORTCUT
+  if (keypoints[0].score < confidence_score) // surreal
+  // if (keypoints[15].score < confidence_score && keypoints[16].score < confidence_score)     // ALERT :: TEST SHORTCUT
       return false;
   else
       return true;
 }
 
-/*
- * for routine check of face & then full body
- */
+
+
+
+//for routine check of face & then full body           
 function checkPoint()
 {
 
@@ -366,18 +368,18 @@ function check_userVoice()
             if (user_voice === 'yes') if_record = true;
             
             // IMPROVEMENT ISSUE :: for timelimitting yes command
-            /*
-            if (yes_triggered < 5000)
-            {
-                user_voice = voice_captured;
-                console.log('(assigned) CAPTURED USER_VOICE :: ' + user_voice + ' at time :: ' + yes_triggered);
-                voice_captured = 'noise';
-            }
-            else
-            {
-                console.log('(not assigned) CAPTURE TIMEOUT :: ' + voice_captured + ' at time :: ' + yes_triggered);
-            }
-            */
+            
+//             if (yes_triggered < 5000)
+//             {
+//                 user_voice = voice_captured;
+//                 console.log('(assigned) CAPTURED USER_VOICE :: ' + user_voice + ' at time :: ' + yes_triggered);
+//                 voice_captured = 'noise';
+//             }
+//             else
+//             {
+//                 console.log('(not assigned) CAPTURE TIMEOUT :: ' + voice_captured + ' at time :: ' + yes_triggered);
+//             }
+            
 
         }
         else if (noise_captured !== voice_captured && (voice_captured !== 'yes' || voice_captured !== 'stop'))
@@ -479,9 +481,8 @@ function drawPoint(ctx, y, x, r, color) {
   ctx.fill();
 }
 
-/**
- * Draws a line on a canvas, i.e. a joint
- */
+
+// Draws a line on a canvas, i.e. a joint
 function drawSegment([ay, ax], [by, bx], color, scale, ctx) {
   ctx.beginPath();
   ctx.moveTo(ax * scale, ay * scale);
@@ -491,9 +492,7 @@ function drawSegment([ay, ax], [by, bx], color, scale, ctx) {
   ctx.stroke();
 }
 
-/**
- * Draws a pose skeleton by looking up all adjacent keypoints/joints
- */
+// Draws a pose skeleton by looking up all adjacent keypoints/joints
 function drawSkeleton(keypoints, minConfidence, ctx, scale = 1) {
   const adjacentKeyPoints = posenet.getAdjacentKeyPoints(keypoints, minConfidence);
 
@@ -596,11 +595,9 @@ function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
     }
 }
 
-/**
- * Draw the bounding box of a pose. For example, for a whole person standing
- * in an image, the bounding box will begin at the nose and extend to one of
- * ankles
- */
+//  * Draw the bounding box of a pose. For example, for a whole person standing
+//  * in an image, the bounding box will begin at the nose and extend to one of
+//  * ankles
 function drawBoundingBox(keypoints, ctx) {
   const boundingBox = posenet.getBoundingBox(keypoints);
 
@@ -625,9 +622,8 @@ function isMobile() {
   return isAndroid() || isiOS();
 }
 
-/**
- * Toggles between the loading UI and the main canvas UI.
- */
+
+// Toggles between the loading UI and the main canvas UI.
 function toggleLoadingUI(
     showLoadingUI, loadingDivId = 'loading', mainDivId = 'main') {
   if (showLoadingUI) {
@@ -640,9 +636,8 @@ function toggleLoadingUI(
 }
 
 // ISSUE :: NO USE
-/**
- * Converts an arary of pixel data into an ImageData object
- */
+
+// Converts an arary of pixel data into an ImageData object
 // async function renderToCanvas(a, ctx) {
 //   const [height, width] = a.shape;
 //   const imageData = new ImageData(width, height);
@@ -662,9 +657,8 @@ function toggleLoadingUI(
 //   ctx.putImageData(imageData, 0, 0);
 // }
 
-/**
- * Draw an image on a canvas
- */
+
+// Draw an image on a canvas
 // function renderImageToCanvas(image, size, canvas) {
 //   canvas.width = size[0];
 //   canvas.height = size[1];
@@ -674,11 +668,10 @@ function toggleLoadingUI(
 // }
 
 
-/**
- * Draw heatmap values, one of the model outputs, on to the canvas
- * Read our blog post for a description of PoseNet's heatmap outputs
- * https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5
- */
+
+//  * Draw heatmap values, one of the model outputs, on to the canvas
+//  * Read our blog post for a description of PoseNet's heatmap outputs
+//  * https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5
 function drawHeatMapValues(heatMapValues, outputStride, canvas) {
   const ctx = canvas.getContext('2d');
   const radius = 5;
@@ -687,10 +680,9 @@ function drawHeatMapValues(heatMapValues, outputStride, canvas) {
   drawPoints(ctx, scaledValues, radius, color);
 }
 
-/**
- * Used by the drawHeatMapValues method to draw heatmap points on to
- * the canvas
- */
+
+//  * Used by the drawHeatMapValues method to draw heatmap points on to
+//  * the canvas
 function drawPoints(ctx, points, radius, color) {
   const data = points.buffer().values;
 
@@ -707,11 +699,10 @@ function drawPoints(ctx, points, radius, color) {
   }
 }
 
-/**
- * Draw offset vector values, one of the model outputs, on to the canvas
- * Read our blog post for a description of PoseNet's offset vector outputs
- * https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5
- */
+
+//  * Draw offset vector values, one of the model outputs, on to the canvas
+//  * Read our blog post for a description of PoseNet's offset vector outputs
+//  * https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5
 function drawOffsetVectors(
     heatMapValues, offsets, outputStride, scale = 1, ctx) {
   const offsetPoints =
@@ -738,10 +729,8 @@ function drawOffsetVectors(
 const videoWidth = 480;
 const videoHeight = 480;
 
-/**
- * Loads a the camera to be used in the demo
- *
- */
+
+//  * Loads a the camera to be used in the demo
 async function setupCamera() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     throw new Error(
@@ -897,9 +886,8 @@ const guiState = {
   net: null,
 };
 
-/**
- * Sets up dat.gui controller on the top-right of the window
- */
+
+//  * Sets up dat.gui controller on the top-right of the window
 function setupGui(cameras, net) {
   guiState.net = net;
 
@@ -908,10 +896,8 @@ function setupGui(cameras, net) {
   }
 }
 
-/**
- * Feeds an image to posenet to estimate poses - this is where the magic
- * happens. This function loops with a requestAnimationFrame method.
- */
+//  * Feeds an image to posenet to estimate poses - this is where the magic
+//  * happens. This function loops with a requestAnimationFrame method.
 function detectPoseInRealTime(video, net) {
   const canvas = document.getElementById('output');
   const ctx = canvas.getContext('2d');
@@ -1133,10 +1119,9 @@ function detectPoseInRealTime(video, net) {
 }
 
 
-/**
- * Kicks off the demo by loading the posenet model, finding and loading
- * available camera devices, and setting off the detectPoseInRealTime function.
- */
+
+//  * Kicks off the demo by loading the posenet model, finding and loading
+//  * available camera devices, and setting off the detectPoseInRealTime function.
 async function bindPage() {
   toggleLoadingUI(true);
   const net = await posenet.load({
