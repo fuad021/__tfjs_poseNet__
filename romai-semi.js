@@ -4,7 +4,7 @@
 // rightHandToShoulder
 // leftHandToShoulder
 // headToTopBend
-// ---------------- territory :: exercise completed (starts) -----------------------
+// ---------------- territory :: exercise completed (ends) -----------------------
 
 
 
