@@ -10,23 +10,26 @@ function predictWord() {
     const threshold = 0.9;
     var score = -1;
     var yes_score = -1;
-    var go_score = -1;
+    var stop_score = -1;
     var time = Date.now();
     var time_th = 1500;
     
     recognizer.listen(({scores}) => {
         scores = Array.from(scores).map((s, i) => ({score: s, word: words[i]}));
+
+        // _background_noise_, _unknown_, down, eight, five, four, go, left,
+        // nine, no, one, right, seven, six, stop, three, two, up, yes, zero
         
         yes_score = scores[18].score;
-        go_score = scores[6].score;
-        if (go_score > yes_score && go_score > threshold && time + time_th < Date.now())
+        stop_score = scores[14].score;
+        if (stop_score > yes_score && stop_score > threshold && time + time_th < Date.now())
         {
             time = Date.now();
-            global_recognizer = scores[6].word;
+            global_recognizer = scores[14].word;
             console.log('(predictWord) CAPTURED :: ' + global_recognizer);
-            score = go_score;
+            score = stop_score;
         }
-        else if (go_score < yes_score && yes_score > threshold && time + time_th < Date.now())
+        else if (stop_score < yes_score && yes_score > threshold && time + time_th < Date.now())
         {
             time = Date.now();
             global_recognizer = scores[18].word;
@@ -143,7 +146,7 @@ function recording()
             console.log('RECORDING (starts) - state :: ' + mediaRecorder.state);
             start_record = false;
         }
-        else if (user_voice === 'go')
+        else if (user_voice === 'stop')
         {
             if_record = false;
             mediaRecorder.stop();
@@ -184,13 +187,13 @@ function checkPoint()
         if (!head_bool)
         {
             user_voice = 'noise';
-            play_audio('./voice/face_negative.mp3', "(negative) face");
+            play_audio('./voice/face_negative.mp3', "(voice) negative - face");
             resetTimer(7000);
         }
         else if (!leg_bool)
         {
             user_voice = 'noise';
-            play_audio('./voice/full_body_negative.mp3', "(negative) full body");
+            play_audio('./voice/full_body_negative.mp3', "(voice) negative - full body");
             resetTimer(7000);
         }
     }
@@ -255,7 +258,7 @@ function user_voice_captured()
     
     if (global_recognizer !== user_voice)
     {
-        if ((global_recognizer === 'yes' || global_recognizer === 'go') && user_voice !== global_recognizer) 
+        if ((global_recognizer === 'yes' || global_recognizer === 'stop') && user_voice !== global_recognizer) 
         {
             yes_triggered = Date.now() - waiting_yes_time;
             waiting_yes_time = Date.now();
@@ -281,7 +284,7 @@ function user_voice_captured()
             */
 
         }
-        else if (noise_captured !== global_recognizer && (global_recognizer !== 'yes' || global_recognizer !== 'go'))
+        else if (noise_captured !== global_recognizer && (global_recognizer !== 'yes' || global_recognizer !== 'stop'))
         {
             noise_captured = global_recognizer;
             console.log('(not assigned) CAPTURED NOISE :: ' + noise_captured);
@@ -1163,14 +1166,16 @@ function detectPoseInRealTime(video, net) {
       
 // ======================================================================================================================================
         frame_count = frame_count + 1;
-        welcome_mb = play_audio_once('./voice/welcome.mp3', welcome_mb, 'welcome to my medical hub');
+        welcome_mb = play_audio_once('./voice/welcome.mp3', welcome_mb, '(voice) Welcome to my medical hub');
         
         user_voice_captured();
         
-        if (head_bool && leg_bool && user_voice !== 'yes' && user_voice !== 'go')
+        if (head_bool && leg_bool && user_voice !== 'yes' && user_voice !== 'stop')
         {
-            play_audio('./voice/fullbodyPos_chin2chestStart.mp3', 'full body captured => YES'); resetTimer(20000); // SHORTCUT ALERT
-            // play_audio('./voice/say_yes.mp3', ''); resetTimer(5000);
+            play_audio('./voice/fullbodyPos_chin2chestStart.mp3', '(voice) Full body captured.\
+                Now we will start chin to chest exercise. Stand side to the camera. Your whole body needs to be seen.\
+                When ready say YES'); resetTimer(20000); // SHORTCUT ALERT
+            // play_audio('./voice/say_yes.mp3', '(voice) When ready say YES'); resetTimer(5000);
             is_voice = false;
             beep_mb = false;
             wrong_pose_mb = false;
@@ -1199,18 +1204,18 @@ function detectPoseInRealTime(video, net) {
             is_voice = false;
             if (pose_bool)
             {
-                beep_mb = play_audio_once('./voice/finish_go_beep.mp3', beep_mb, 'finish go beep');
+                beep_mb = play_audio_once('./voice/finish_say_stop.mp3', beep_mb, '(voice) Please start the exercise after listening to the BEEP sound. When finished, say, STOP');
                 setTimeout(recording, 6500);
             }
             else
             {
-                wrong_pose_mb = play_audio_once('./voice/wrong_pose.mp3', wrong_pose_mb, 'wrong pose');
+                wrong_pose_mb = play_audio_once('./voice/wrong_pose.mp3', wrong_pose_mb, '(voice) You are in a wrong pose. Please stand according to given instructions.');
             }
         }
-        else if (head_bool && leg_bool && user_voice === 'go')
+        else if (head_bool && leg_bool && user_voice === 'stop')
         {
             is_voice = false;
-            completed_mb = play_audio_once('./voice/successfully_completed.mp3', completed_mb, 'exercise completed');
+            completed_mb = play_audio_once('./voice/successfully_completed.mp3', completed_mb, '(voice) You have successfully completed the exercise.');
             retreat();
         }
         else

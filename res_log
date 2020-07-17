@@ -22,6 +22,7 @@ successfully_completed                      :: You have successfully completed t
 fullbodyPos_chin2chestStart                 :: Full body captured.  Now we will start chin to chest exercise. Stand side to the camera. Your whole body needs to be
                                                seen. When ready say "YES" (full_body_positive + chin2chest_start + sideface_YES)
 finish_go_beep                              :: Please start the exercise after listening the 'Beep' sound. When finished, say, 'Go'. [BEEP] (beep_go + beep)
+finish_say_stop                             :: Please start the exercise after listening to the 'Beep' sound. When finished, say, 'Stop'.
 say_yes                                     :: When ready say yes.
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------

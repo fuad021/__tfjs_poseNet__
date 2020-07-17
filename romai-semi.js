@@ -80,25 +80,28 @@ function predictWord() {
     const threshold = 0.9;
     var score = -1;
     var yes_score = -1;
-    var go_score = -1;
+    var stop_score = -1;
     var time = Date.now();
     var time_th = 1500;
     
     recognizer.listen(({scores}) => {
         scores = Array.from(scores).map((s, i) => ({score: s, word: words[i]}));
+
+        // _background_noise_, _unknown_, down, eight, five, four, go, left,
+        // nine, no, one, right, seven, six, stop, three, two, up, yes, zero
         
         yes_score = scores[18].score;
-        go_score = scores[6].score;
+        stop_score = scores[14].score;
         if (is_voice_recognizer_enabled)
         {
-          if (go_score > yes_score && go_score > threshold && time + time_th < Date.now())
+          if (stop_score > yes_score && stop_score > threshold && time + time_th < Date.now())
           {
               time = Date.now();
-              voice_captured = scores[6].word;
+              voice_captured = scores[14].word;
               console.log('(predictWord) CAPTURED :: ' + voice_captured);
-              score = go_score;
+              score = stop_score;
           }
-          else if (go_score < yes_score && yes_score > threshold && time + time_th < Date.now())
+          else if (stop_score < yes_score && yes_score > threshold && time + time_th < Date.now())
           {
               time = Date.now();
               voice_captured = scores[18].word;
@@ -181,7 +184,7 @@ function recording()
             console.log('RECORDING (starts) - state :: ' + mediaRecorder.state);
             start_record = false;
         }
-        else if (user_voice === 'go' && mediaRecorder.state === 'recording')
+        else if (user_voice === 'stop' && mediaRecorder.state === 'recording')
         {
             if_record = false;
             mediaRecorder.stop();
@@ -278,7 +281,7 @@ function checkPoint()
 function check_userVoice()
 {    
     is_api_call = true;
-    // (clarification) user_voice !== 'go' in 20 sec
+    // (clarification) user_voice !== 'stop' in 20 sec
     if ((waiting_yes_time + 20000) < Date.now() && user_voice === 'yes')  // ISSUE OVERLAPPING
     {
         user_voice = 'noise';
@@ -297,7 +300,7 @@ function check_userVoice()
     
     if (voice_captured !== user_voice)
     {
-        if ((voice_captured === 'yes' || voice_captured === 'go') && user_voice !== voice_captured) 
+        if ((voice_captured === 'yes' || voice_captured === 'stop') && user_voice !== voice_captured) 
         {
             yes_triggered = Date.now() - waiting_yes_time;
             waiting_yes_time = Date.now();
@@ -323,7 +326,7 @@ function check_userVoice()
             */
 
         }
-        else if (noise_captured !== voice_captured && (voice_captured !== 'yes' || voice_captured !== 'go'))
+        else if (noise_captured !== voice_captured && (voice_captured !== 'yes' || voice_captured !== 'stop'))
         {
             noise_captured = voice_captured;
             console.log('(not assigned) CAPTURED NOISE :: ' + noise_captured);
@@ -1012,7 +1015,7 @@ function detectPoseInRealTime(video, net) {
         frame_count = frame_count + 1;
         check_userVoice();
 
-        if (head_bool && leg_bool && user_voice !== 'yes' && user_voice !== 'go' && continue_exercise)
+        if (head_bool && leg_bool && user_voice !== 'yes' && user_voice !== 'stop' && continue_exercise)
         {
             // ALERT :: TEST SHORTCUT
             play_audio(exerciseMp3, '(voice) ' + exerciseName + ' starting...'); resetTimer(21000);
@@ -1038,7 +1041,7 @@ function detectPoseInRealTime(video, net) {
             is_voice = false;
             if (pose_bool)
             {
-                beep_mb = play_audio_once('./voice/finish_go_beep.mp3', beep_mb, '(voice) finish go beep');
+                beep_mb = play_audio_once('./voice/finish_say_stop.mp3', beep_mb, '(voice) Please start the exercise after listening to the BEEP sound. When finished, say, STOP');
                 setTimeout(recording, 6500);
             }
             else
@@ -1046,7 +1049,7 @@ function detectPoseInRealTime(video, net) {
                 wrong_pose_mb = play_audio_once('./voice/wrong_pose.mp3', wrong_pose_mb, '(voice) wrong pose');
             }
         }
-        else if (head_bool && leg_bool && user_voice === 'go' && continue_exercise)
+        else if (head_bool && leg_bool && user_voice === 'stop' && continue_exercise)
         {
             continue_exercise = false;
             completed_mb = play_audio_once('./voice/semi/completed-continue-or-terminate.mp3', completed_mb, '(voice) exercise completed');
