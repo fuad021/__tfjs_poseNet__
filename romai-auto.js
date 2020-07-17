@@ -59,6 +59,12 @@ let height = 76;
 let exerciseName = 'chinToChest';
 let queue_result = [];
 const queue_url = 'https://romai.injurycloud.com/queue_status/?testId='+ testId +'&tenant='+ tenant +'&patientId=' + patientId
+function queue_api_call() {
+  fetch(queue_url)
+      .then((resp) => resp.json())
+      .then(function(data) {let queue = data.queue; if(queue.length){queue.forEach(print_queue)}})
+      .catch(function(error) {console.log(error)});
+}
 const queue_checker = setInterval(queue_api_call, 5000);
 // ================================================================================
 
@@ -156,12 +162,7 @@ function print_queue(item, index) {
   }
 }
 
-const queue_api_call = function() {
-  fetch(queue_url)
-      .then((resp) => resp.json())
-      .then(function(data) {let queue = data.queue; if(queue.length){queue.forEach(print_queue)}})
-      .catch(function(error) {console.log(error)});
-}
+
 
 // unique identifier
 function uuidv4() {
