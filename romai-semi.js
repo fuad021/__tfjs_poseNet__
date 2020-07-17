@@ -29,6 +29,9 @@ let exerciseName = '(none)';
 let continue_exercise = false;
 let exerciseMp3;
 let is_api_call = true;
+let queue_result = [];
+const queue_url = 'https://romai.injurycloud.com/queue_status/?testId='+ testId +'&tenant='+ tenant +'&patientId=' + patientId
+const queue_checker = setInterval(queue_api_call, 5000);
 
 // color vars
 const red = '#d2222d';
@@ -73,6 +76,58 @@ let checker;
 
 
 // ---------------- territory :: utility (starts) -----------------------
+
+// queue_api :: printing result
+function print_queue(item, index) {
+  if(!queue_result.includes(item.exerciseName))
+  {
+      console.log('(api) queue :: new exercise -', item.exerciseName);
+      queue_result.push(item.exerciseName);
+      if (item.status === "completed") {
+          var queue = document.getElementById("queue");
+          
+          var a1 = document.createElement('a');
+          var a2 = document.createElement('a');
+          var a3 = document.createElement('a');
+          var br = document.createElement('br');
+          
+          var link1 = document.createTextNode("raw_video");
+          var link2 = document.createTextNode("rendered_picture");
+          var link3 = document.createTextNode("rendered_video");
+          
+          a1.appendChild(link1);
+          a1.title = "raw_video";  
+          a1.href = "https://romai.injurycloud.com/" + item.request_output.raw_video;
+
+          a2.appendChild(link2);
+          a2.title = "rendered_picture";  
+          a2.href = "https://romai.injurycloud.com/" + item.request_output.rendered_picture;
+          
+          a3.appendChild(link3);
+          a3.title = "rendered_video";  
+          a3.href = "https://romai.injurycloud.com/" + item.request_output.rendered_video;
+          
+          queue.appendChild(document.createTextNode(item.exerciseName + " :: "));
+          queue.appendChild(a1);
+          queue.appendChild(document.createTextNode(" - "));
+          queue.appendChild(a2);
+          queue.appendChild(document.createTextNode(" - "));
+          queue.appendChild(a3);
+          queue.appendChild(br);
+      }
+  }
+  else
+  {
+      console.log('(api) queue :: no new exercise');
+  }
+}
+
+const queue_api_call = function() {
+  fetch(queue_url)
+      .then((resp) => resp.json())
+      .then(function(data) {let queue = data.queue; if(queue.length){queue.forEach(print_queue)}})
+      .catch(function(error) {console.log(error)});
+}
 
 // voice recognition utility
 function predictWord() {
@@ -282,7 +337,7 @@ function check_userVoice()
 {    
     is_api_call = true;
     // (clarification) user_voice !== 'stop' in 20 sec
-    if ((waiting_yes_time + 20000) < Date.now() && user_voice === 'yes')  // ISSUE OVERLAPPING
+    if ((waiting_yes_time + 14000) < Date.now() && user_voice === 'yes')  // ISSUE OVERLAPPING
     {
         user_voice = 'noise';
         console.log('#### YES TIMEOUT #### :: ' + (Date.now() - waiting_yes_time));
@@ -761,8 +816,7 @@ async function setupCamera() {
                 .then(responseJSON => {console.log('(response) client_storage :: ', responseJSON)})
                 .then(fetch('https://romai.injurycloud.com/process_exercise/', post_data)
                             .then(response => response.json())
-                            .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)}));
-            
+                            .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)}));            
             
             // psuedo api calls
             // console.log('(request) client_storage :: ' + filename);
