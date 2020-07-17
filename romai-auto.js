@@ -65,7 +65,7 @@ function queue_api_call() {
       .then(function(data) {let queue = data.queue; if(queue.length){queue.forEach(print_queue)}})
       .catch(function(error) {console.log(error)});
 }
-const queue_checker = setInterval(queue_api_call, 5000);
+const queue_checker = setInterval(queue_api_call, 10000);   // ALERT
 // ================================================================================
 
 const red = '#d2222d';

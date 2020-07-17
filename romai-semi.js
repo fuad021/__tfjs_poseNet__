@@ -21,7 +21,8 @@ let start_record = true;
 let mediaRecorder = 'not init';
 
 // api vars
-let patientId = uuidv4();   // ALERT TEST
+let patientId = uuidv4();   // 
+TEST
 let testId = 'TEST-01';
 let tenant = 'telemeddev';
 let height = 76;
@@ -37,7 +38,7 @@ function queue_api_call() {
       .then(function(data) {let queue = data.queue; if(queue.length){queue.forEach(print_queue)}})
       .catch(function(error) {console.log(error)});
 }
-const queue_checker = setInterval(queue_api_call, 5000);    // ALERT TEST
+const queue_checker = setInterval(queue_api_call, 10000);    // ALERT TEST
 
 // color vars
 const red = '#d2222d';
@@ -285,8 +286,8 @@ function check_head(keypoints)
 
 function check_leg(keypoints)
 {
-  if (keypoints[0].score < confidence_score) // surreal
-  // if (keypoints[15].score < confidence_score && keypoints[16].score < confidence_score)     // ALERT :: TEST SHORTCUT
+  // if (keypoints[0].score < confidence_score) // surreal
+  if (keypoints[15].score < confidence_score && keypoints[16].score < confidence_score)     // ALERT :: TEST SHORTCUT
       return false;
   else
       return true;
