@@ -21,8 +21,7 @@ let start_record = true;
 let mediaRecorder = 'not init';
 
 // api vars
-let patientId = uuidv4();   // 
-TEST
+let patientId = uuidv4();   // TEST
 let testId = 'TEST-01';
 let tenant = 'telemeddev';
 let height = 76;
@@ -38,7 +37,7 @@ function queue_api_call() {
       .then(function(data) {let queue = data.queue; if(queue.length){queue.forEach(print_queue)}})
       .catch(function(error) {console.log(error)});
 }
-const queue_checker = setInterval(queue_api_call, 10000);    // ALERT TEST
+const queue_checker = setInterval(queue_api_call, 10000);    // TEST
 
 // color vars
 const red = '#d2222d';
@@ -339,7 +338,7 @@ function check_userVoice()
 {    
     is_api_call = true;
     // (clarification) user_voice !== 'stop' in 20 sec
-    if ((waiting_yes_time + 14000) < Date.now() && user_voice === 'yes')  // ISSUE OVERLAPPING
+    if ((waiting_yes_time + 21000) < Date.now() && user_voice === 'yes')  // ISSUE OVERLAPPING
     {
         user_voice = 'noise';
         console.log('#### YES TIMEOUT #### :: ' + (Date.now() - waiting_yes_time));
@@ -404,7 +403,7 @@ $("#start" ).on('click', function()
         is_voice_recognizer_enabled = true;
         voice_recognizer();
         checker = setInterval(checkPoint, interval);
-        // ALERT :: TEST SHORTCUT - semi/welcome
+        // TEST SHORTCUT - semi/welcome
         play_audio('voice/semi/welcome.mp3', '(voice) Welcome to mmh. Select an exercise from dropdown menu.');
     }
     else
@@ -796,7 +795,7 @@ async function setupCamera() {
               body: JSON.stringify(data)
           };
           
-            // ALERT :: TEST SHORTCUT :: api calls
+            // TEST SHORTCUT :: api calls
             console.log('(request) client_storage :: ' + filename);
             console.log('(request) blobBase64 :: ' + base64data.substring(0, 121));
             console.log('(typeof) base64data :: ' + typeof base64data);
@@ -867,7 +866,7 @@ const setResNet = {
 
 const guiState = {
   algorithm: 'single-pose',
-  input: setMobileNet,        // ALERT :: DEPLOT SHORTCUT - change to ResNet50 model
+  input: setMobileNet,        // DEPLOY SHORTCUT :: change to ResNet50 model
   singlePoseDetection: {
     minPoseConfidence: 0.1,
     minPartConfidence: 0.5,
@@ -1057,7 +1056,7 @@ function detectPoseInRealTime(video, net) {
 
         if (head_bool && leg_bool && user_voice !== 'yes' && user_voice !== 'stop' && continue_exercise)
         {
-            // ALERT :: TEST SHORTCUT
+            // TEST
             play_audio(exerciseMp3, '(voice) ' + exerciseName + ' starting...'); resetTimer(21000);
             // play_audio('./voice/say_yes.mp3', '(voice) say yes'); resetTimer(5000);
             
@@ -1076,7 +1075,7 @@ function detectPoseInRealTime(video, net) {
         }
         else if (head_bool && leg_bool && user_voice === 'yes' && continue_exercise)
         {
-            // pose_bool = posture_right_hands_up(keypoints); // ALERT :: FUTURE DECISION SHORTCUT
+            // pose_bool = posture_right_hands_up(keypoints); // FUTURE :: DECISION SHORTCUT
             pose_bool = true;
             is_voice = false;
             if (pose_bool)

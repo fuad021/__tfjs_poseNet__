@@ -52,11 +52,11 @@ voice_recognizer_app();
 // ================================================================================
 //                                API VARIABLES
 // ================================================================================
-let patientId = uuidv4();   // ALERT TEST
+let patientId = uuidv4();
 let testId = 'TEST-01';
 let tenant = 'telemeddev';
 let height = 76;
-let exerciseName = 'chinToChest';
+let exerciseName = 'chinToChest';   // ALERT
 let queue_result = [];
 const queue_url = 'https://romai.injurycloud.com/queue_status/?testId='+ testId +'&tenant='+ tenant +'&patientId=' + patientId
 function queue_api_call() {
@@ -65,7 +65,7 @@ function queue_api_call() {
       .then(function(data) {let queue = data.queue; if(queue.length){queue.forEach(print_queue)}})
       .catch(function(error) {console.log(error)});
 }
-const queue_checker = setInterval(queue_api_call, 10000);   // ALERT
+const queue_checker = setInterval(queue_api_call, 10000);
 // ================================================================================
 
 const red = '#d2222d';
@@ -119,42 +119,40 @@ let mediaRecorder = 'not init';
 
 // queue_api :: printing result
 function print_queue(item, index) {
-  if(!queue_result.includes(item.exerciseName))
+  if(!queue_result.includes(item.exerciseName) && item.status === "completed")
   {
       console.log('(api) queue :: new exercise -', item.exerciseName);
       queue_result.push(item.exerciseName);
-      if (item.status === "completed") {
-          var queue = document.getElementById("queue");
-          
-          var a1 = document.createElement('a');
-          var a2 = document.createElement('a');
-          var a3 = document.createElement('a');
-          var br = document.createElement('br');
-          
-          var link1 = document.createTextNode("raw_video");
-          var link2 = document.createTextNode("rendered_picture");
-          var link3 = document.createTextNode("rendered_video");
-          
-          a1.appendChild(link1);
-          a1.title = "raw_video";  
-          a1.href = "https://romai.injurycloud.com/" + item.request_output.raw_video;
+      var queue = document.getElementById("queue");
+      
+      var a1 = document.createElement('a');
+      var a2 = document.createElement('a');
+      var a3 = document.createElement('a');
+      var br = document.createElement('br');
+      
+      var link1 = document.createTextNode("raw_video");
+      var link2 = document.createTextNode("rendered_picture");
+      var link3 = document.createTextNode("rendered_video");
+      
+      a1.appendChild(link1);
+      a1.title = "raw_video";  
+      a1.href = "https://romai.injurycloud.com/" + item.request_output.raw_video;
 
-          a2.appendChild(link2);
-          a2.title = "rendered_picture";  
-          a2.href = "https://romai.injurycloud.com/" + item.request_output.rendered_picture;
-          
-          a3.appendChild(link3);
-          a3.title = "rendered_video";  
-          a3.href = "https://romai.injurycloud.com/" + item.request_output.rendered_video;
-          
-          queue.appendChild(document.createTextNode(item.exerciseName + " :: "));
-          queue.appendChild(a1);
-          queue.appendChild(document.createTextNode(" - "));
-          queue.appendChild(a2);
-          queue.appendChild(document.createTextNode(" - "));
-          queue.appendChild(a3);
-          queue.appendChild(br);
-      }
+      a2.appendChild(link2);
+      a2.title = "rendered_picture";  
+      a2.href = "https://romai.injurycloud.com/" + item.request_output.rendered_picture;
+      
+      a3.appendChild(link3);
+      a3.title = "rendered_video";  
+      a3.href = "https://romai.injurycloud.com/" + item.request_output.rendered_video;
+      
+      queue.appendChild(document.createTextNode(item.exerciseName + " :: "));
+      queue.appendChild(a1);
+      queue.appendChild(document.createTextNode(" - "));
+      queue.appendChild(a2);
+      queue.appendChild(document.createTextNode(" - "));
+      queue.appendChild(a3);
+      queue.appendChild(br);
   }
   else
   {
@@ -289,7 +287,7 @@ function check_head(keypoints)
 function check_leg(keypoints)
 {
   // if (keypoints[3].score < confidence_score) // surreal
-  if (keypoints[15].score < confidence_score && keypoints[16].score < confidence_score)     // SHORTCUT ALERT
+  if (keypoints[15].score < confidence_score && keypoints[16].score < confidence_score)     // ALERT :: TEST SHORTCUT
       return false;
   else
       return true;
@@ -299,7 +297,7 @@ function check_leg(keypoints)
 // ISSUE OVERLAPPING
 function user_voice_captured() 
 {    
-    if ((waiting_yes_time + 14000) < Date.now() && user_voice === 'yes') 
+    if ((waiting_yes_time + 21000) < Date.now() && user_voice === 'yes') 
     {
         user_voice = 'noise';
         console.log('#### YES TIMEOUT #### :: ' + (Date.now() - waiting_yes_time));
@@ -545,7 +543,7 @@ function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
   }
   */
   
-  // POSTURE COLORIZATION :: SIDE FACE              // NEW DEFINITION ALERT
+  // POSTURE COLORIZATION :: SIDE FACE              // NEW DEFINITION
     if (is_posture_colorization)
     {
         var points = getPoints(keypoints);
@@ -808,7 +806,7 @@ async function setupCamera() {
                             .then(response => response.json())
                             .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)}));
 
-            // ALERT :: pseudo api calls
+            // PSEUDO :: api calls
             /*
             console.log('(request) client_storage :: ' + filename);
             console.log('(request) blobBase64 :: ' + base64data.substring(0, 121));
@@ -865,7 +863,7 @@ const setResNet = {
 
 const guiState = {
   algorithm: 'single-pose',
-  input: setMobileNet,        // ALERT :: DEPLOT SHORTCUT - change to ResNet50 model
+  input: setMobileNet,        // DEPLOY SHORTCUT :: change to ResNet50 model
   singlePoseDetection: {
     minPoseConfidence: 0.1,
     minPartConfidence: 0.5,
@@ -1227,10 +1225,8 @@ function detectPoseInRealTime(video, net) {
         
         if (head_bool && leg_bool && user_voice !== 'yes' && user_voice !== 'stop')
         {
-            play_audio('./voice/fullbodyPos_chin2chestStart.mp3', '(voice) Full body captured.\
-                Now we will start chin to chest exercise. Stand side to the camera. Your whole body needs to be seen.\
-                When ready say YES'); resetTimer(20000); // SHORTCUT ALERT
-            // play_audio('./voice/say_yes.mp3', '(voice) When ready say YES'); resetTimer(5000);
+            play_audio('./voice/fullbodyPos_chin2chestStart.mp3', '(voice) Full body captured. Now we will start chin to chest exercise. Stand side to the camera. Your whole body needs to be seen. When ready say YES'); resetTimer(20000); 
+            // play_audio('./voice/say_yes.mp3', '(voice) When ready say YES'); resetTimer(5000); // TEST
             is_voice = false;
             beep_mb = false;
             wrong_pose_mb = false;
@@ -1254,7 +1250,7 @@ function detectPoseInRealTime(video, net) {
         }
         else if (head_bool && leg_bool && user_voice === 'yes')
         {
-            // pose_bool = posture_right_hands_up(keypoints); // SHORTCUT ALERT
+            // pose_bool = posture_right_hands_up(keypoints); // FUTURE
             pose_bool = true;
             is_voice = false;
             if (pose_bool)
