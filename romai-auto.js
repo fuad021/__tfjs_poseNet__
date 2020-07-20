@@ -863,7 +863,7 @@ const setResNet = {
 
 const guiState = {
   algorithm: 'single-pose',
-  input: setMobileNet,        // DEPLOY SHORTCUT :: change to ResNet50 model
+  input: setResNet,        // DEPLOY SHORTCUT :: change to ResNet50 model
   singlePoseDetection: {
     minPoseConfidence: 0.1,
     minPartConfidence: 0.5,
