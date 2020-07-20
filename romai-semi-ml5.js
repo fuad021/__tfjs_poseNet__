@@ -358,8 +358,8 @@ function check_head(keypoints)
 
 function check_leg(keypoints)
 {
-  if (keypoints[0].score < confidence_score) // surreal
-  // if (keypoints[15].score < confidence_score && keypoints[16].score < confidence_score)     // ALERT :: TEST SHORTCUT
+  // if (keypoints[0].score < confidence_score) // surreal
+  if (keypoints[15].score < confidence_score && keypoints[16].score < confidence_score)     // ALERT :: TEST SHORTCUT
       return false;
   else
       return true;
