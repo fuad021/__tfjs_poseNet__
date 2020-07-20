@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ROM Ai - MyMedicalHub™</title>
+        <script type="text/javascript" src="./tf.js"></script>
+        <script type="text/javascript" src="./posenet.js"></script>
+        <script type="text/javascript" src="./dat.gui.min.js"></script>
+
+        <script type="text/javascript" src="jquery.min.js"></script>
+        
+        <script src="./p5.speech/p5.min.js"></script>
+        <script src="./p5.speech/p5.sound.min.js"></script>
+        <script src="./p5.speech/p5.speech.js"></script>
+            
+        <link rel="stylesheet" type="text/css" href="./style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+
+    <body>                
+        <div id="info" style='display:none'></div>
+        
+        <div id="loading" style='display:flex'>
+            <div class="spinner-text">
+                Loading PoseNet & speech-command model...
+            </div>
+            <div class="sk-spinner sk-spinner-pulse"></div>
+        </div>
+        
+        <div id='main' style='display:none'>
+            <video id="video" playsinline style="display: none;"></video>
+            <canvas id="output" />
+        </div>
+        
+        <button id='start'>Start</button>
+        <select id="select">
+            <option value="none">(none)</option>
+            <option value="chinToChest">chinToChest</option>
+            <option value="lookCeiling">lookCeiling</option>
+            <option value="rightHandToShoulder">rightHandToShoulder</option>
+            <option value="leftHandToShoulder">leftHandToShoulder</option>
+            <option value="headToTopBend">headToTopBend</option>
+        </select>
+        <button id='stop'>Stop</button>
+        
+        <ul id="queue"></ul>
+
+        <div class="footer">
+            <div class="footer-text">
+                <p>
+                    ROM Ai @ MMH
+                </p>
+            </div>
+        </div>
+        
+        <script src="romai-semi-ml5.js"></script>
+        
+    </body>
+</html>
