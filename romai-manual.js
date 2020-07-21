@@ -6,19 +6,36 @@
 // headToTopBend
 // ---------------- territory :: exercise completed (ends) -----------------------
 
-
-
-// ---------------- territory :: global variables (starts) -----------------------
-// voice recognition vars
-let recognizer;
-let voice_captured;
-let is_voice_recognizer_enabled = true;
+// MediaRecorder states :: inactive, recording, paused
 
 // recording vars
 let chunks = [];
 let if_record = true;
-let start_record = true;
 let mediaRecorder = 'not init';
+
+let start_time;
+function start_recording()
+{
+  if (mediaRecorder.state === 'inactive')
+  {
+    play_audio('./voice/manual/beep.mp3', '(recording starts) - state :: ' + mediaRecorder.state);
+    start_time = Date.now();
+    mediaRecorder.start();
+  }
+}
+
+function stop_recording()
+{
+  if (mediaRecorder.state === 'recording')
+  {
+    mediaRecorder.stop();
+    console.log('(recording finished) - state ::', mediaRecorder.state);
+    console.log('Recording time :: ', Date.now() - start_time);
+    play_audio('./voice/manual/beep-end.mp3', '(voice) exercise completed');
+    play_audio('./voice/manual/completed-continue-or-terminate.mp3', '(voice) exercise completed');
+    setTimeout(() => {exerciseName = '(none)'}, 10000);
+  }
+}
 
 // api vars
 let patientId = uuidv4();   // TEST
@@ -31,13 +48,6 @@ let exerciseMp3;
 let is_api_call = true;
 let queue_result = [];
 const queue_url = 'https://romai.injurycloud.com/queue_status/?testId='+ testId +'&tenant='+ tenant +'&patientId=' + patientId
-function queue_api_call() {
-  fetch(queue_url)
-      .then((resp) => resp.json())
-      .then(function(data) {let queue = data.queue; if(queue.length){queue.forEach(print_queue)}})
-      .catch(function(error) {console.log(error)});
-}
-const queue_checker = setInterval(queue_api_call, 10000);    // TEST
 
 // color vars
 const red = '#d2222d';
@@ -54,15 +64,9 @@ const y_adjust = 21;
 const lineWidth = 12;
 const pointRadius = 12;
 let posture;
-let is_posture_colorization = true;
+let is_posture_colorization = false;
 
-// voice vars
-let user_voice = 'noise';
-let noise_captured = 'noise';
 let is_voice = true;
-let welcome_mb = false;
-let beep_mb = false;
-let wrong_pose_mb = false;
 let completed_mb = false;
 
 // misc
@@ -73,8 +77,6 @@ let confidence_score = 0.1;
 let head_bool = false;
 let leg_bool = false;
 let curr_time = Date.now();
-let waiting_yes_time = Date.now();
-let yes_triggered = 99999;
 let interval = 10000;
 let checker;
 // ---------------- territory :: global variables (ends) -----------------------
@@ -82,6 +84,14 @@ let checker;
 
 
 // ---------------- territory :: utility (starts) -----------------------
+
+function queue_api_call() {
+  fetch(queue_url)
+      .then((resp) => resp.json())
+      .then(function(data) {let queue = data.queue; if(queue.length){queue.forEach(print_queue)}})
+      .catch(function(error) {console.log(error)});
+}
+const queue_checker = setInterval(queue_api_call, 10000);    // TEST
 
 // queue_api :: printing result
 function print_queue(item, index) {
@@ -129,127 +139,6 @@ function print_queue(item, index) {
   }
 }
 
-// ---------------- territory :: ml5 voice recognition (starts) -----------------------
-
-var userVoiceRecorder = new p5.SpeechRec();
-userVoiceRecorder.continuous = false;
-userVoiceRecorder.onEnd = restart;
-
-function restart() {
-    userVoiceRecorder.start();
-}
-
-function setup() {
-    noCanvas();
-    userVoiceRecorder.onResult = user_voice_captured;
-    restart();
-    console.log('ml5 voice recognizer started ...');
-}
-
-function user_voice_captured() 
-{    
-    if (userVoiceRecorder.resultValue === true && user_voice !== userVoiceRecorder.resultString && (userVoiceRecorder.resultString === 'yes' || userVoiceRecorder.resultString === 'stop'))
-    {
-        voice_captured = userVoiceRecorder.resultString;
-        console.log('(voice captured) :: ' + voice_captured);
-    }
-    else if(userVoiceRecorder.resultValue === true)
-    {
-        console.log('(voice captured, not assigned) :: ' + userVoiceRecorder.resultString);
-    }
-}
-
-function check_userVoice()
-{    
-    is_api_call = true;
-    // (clarification) user_voice !== 'stop' in 20 sec
-    if ((waiting_yes_time + 21000) < Date.now() && user_voice === 'yes')  // ISSUE OVERLAPPING
-    {
-        user_voice = 'noise';
-        console.log('#### YES TIMEOUT #### :: ' + (Date.now() - waiting_yes_time));
-        beep_mb = false;
-        wrong_pose_mb = false;
-        completed_mb = false;
-
-        if (mediaRecorder.state === 'recording')
-        {
-          is_api_call = false;
-          mediaRecorder.stop();
-          console.log('RECORDING (deleted) - state :: ', mediaRecorder.state);
-        }
-    }
-    
-    if (voice_captured !== user_voice)
-    {
-        if ((voice_captured === 'yes' || voice_captured === 'stop') && user_voice !== voice_captured) 
-        {
-            yes_triggered = Date.now() - waiting_yes_time;
-            waiting_yes_time = Date.now();
-            
-            user_voice = voice_captured;
-            console.log('(assigned) CAPTURED USER_VOICE :: ' + user_voice);
-            voice_captured = '';
-            
-            if (user_voice === 'yes') if_record = true;
-        }
-        else if (noise_captured !== voice_captured && (voice_captured !== 'yes' || voice_captured !== 'stop'))
-        {
-            noise_captured = voice_captured;
-            console.log('(not assigned) CAPTURED NOISE :: ' + noise_captured);
-        }
-    }
-}
-// ---------------- territory :: ml5 voice recognition (ends) -----------------------
-
-// voice recognition utility
-
-// function predictWord() {
-//     const words = recognizer.wordLabels();
-//     const threshold = 0.97;
-//     var score = -1;
-//     var yes_score = -1;
-//     var stop_score = -1;
-//     var time = Date.now();
-//     var time_th = 1500;
-//     
-//     recognizer.listen(({scores}) => {
-//         scores = Array.from(scores).map((s, i) => ({score: s, word: words[i]}));
-// 
-//         // _background_noise_, _unknown_, down, eight, five, four, go, left,
-//         // nine, no, one, right, seven, six, stop, three, two, up, yes, zero
-//         
-//         yes_score = scores[18].score;
-//         stop_score = scores[14].score;
-//         if (is_voice_recognizer_enabled)
-//         {
-//           if (stop_score > yes_score && stop_score > threshold && time + time_th < Date.now())
-//           {
-//               time = Date.now();
-//               voice_captured = scores[14].word;
-//               console.log('(predictWord) CAPTURED :: ' + voice_captured);
-//               score = stop_score;
-//           }
-//           else if (stop_score < yes_score && yes_score > threshold && time + time_th < Date.now())
-//           {
-//               time = Date.now();
-//               voice_captured = scores[18].word;
-//               console.log('(predictWord) CAPTURED :: ' + voice_captured);
-//               score = yes_score;
-//           }
-//         }
-//     }, {probabilityThreshold: threshold});
-// }
-// 
-// async function voice_recognizer()
-// {
-//     recognizer = speechCommands.create('BROWSER_FFT');
-//     await recognizer.ensureModelLoaded();
-//     predictWord()
-// }
-// voice_recognizer()
-
-
-
 // misc utility
 function uuidv4()
 {
@@ -290,7 +179,7 @@ function posture_colorization(keypoints, minConfidence)
             var y = points[1];
             
             if ((Math.abs(x[5] - x[6]) < x_adjust*2) && (Math.abs(x[11] - x[12]) < x_adjust*2)) 
-                color = green;
+                color = red; // TEST - colorization not working
             else color = red;
         }
         else if (posture != 'frontface' && (exerciseName == 'rightHandToShoulder' || exerciseName == 'leftHandToShoulder'))
@@ -299,33 +188,9 @@ function posture_colorization(keypoints, minConfidence)
             console.log('(draw) posture_colorization :: ' + posture);
 
             res = fullBodyCheckConfCount(keypoints, minConfidence);
-            if (res > 15) color = green;
+            if (res > 15) color = red;
             else color = red;
         }
-    }
-}
-
-function recording()
-{
-    if (if_record)
-    {
-        if (user_voice === 'yes' && start_record && mediaRecorder.state === 'inactive')
-        {
-            mediaRecorder.start();
-            console.log('RECORDING (starts) - state :: ' + mediaRecorder.state);
-            start_record = false;
-        }
-        else if (user_voice === 'stop' && mediaRecorder.state === 'recording')
-        {
-            if_record = false;
-            mediaRecorder.stop();
-            console.log('RECORDING (finished) - state ::', mediaRecorder.state);
-            user_voice = 'noise';
-        }
-    }
-    else 
-    {
-        // console.log('(bool) if_record :: ', if_record);
     }
 }
 
@@ -361,7 +226,7 @@ function check_head(keypoints)
 
 function check_leg(keypoints)
 {
-  // if (keypoints[0].score < confidence_score) // surreal
+  // (keypoints[0].score < confidence_score) // surreal
   if (keypoints[15].score < confidence_score && keypoints[16].score < confidence_score)     // ALERT :: TEST SHORTCUT
       return false;
   else
@@ -390,7 +255,6 @@ function checkPoint()
         is_voice = true;
         if (!head_bool)
         {
-            user_voice = 'noise';
             if (mediaRecorder.state === 'recording')
             {
               is_api_call = false;
@@ -403,9 +267,18 @@ function checkPoint()
         }
         else if (!leg_bool)
         {
-            user_voice = 'noise';
+            if (mediaRecorder.state === 'recording')
+            {
+              is_api_call = false;
+              mediaRecorder.stop();
+              console.log('RECORDING (deleted) - state :: ', mediaRecorder.state);
+            }
             play_audio('./voice/full_body_negative.mp3', "(voice) negative - full body");
             resetTimer(7000);
+        }
+        else if (head_bool && leg_bool && exerciseName === '(none)')
+        {
+          play_audio('./voice/select_exercise.mp3', "(voice) please select an exercise from the dropdown menu.")
         }
     }
 }
@@ -422,11 +295,7 @@ $("#start" ).on('click', function()
     if (!is_start)
     {
         is_start = true;
-        is_voice_recognizer_enabled = true;
-        // voice_recognizer();
-        user_voice_captured();
         checker = setInterval(checkPoint, interval);
-        // TEST SHORTCUT - semi/welcome
         play_audio('voice/semi/welcome.mp3', '(voice) Welcome to mmh. Select an exercise from dropdown menu.');
     }
     else
@@ -443,16 +312,11 @@ $("#stop" ).on('click', function()
         is_voice = true;
         play_audio('voice/semi/terminate.mp3', '(voice) Program terminating...')
         clearInterval(checker);
-        if (is_voice_recognizer_enabled) 
-        {
-            is_voice_recognizer_enabled = false;
-            console.log('(voice_recognizer) :: DISABLED');
-        }
+        clearInterval(queue_checker);
     }
     else
     {
         console.log('(bool) is_start :: ' + is_start);
-        // play_audio('voice/semi/start-again.mp3', '(voice) Program is terminated. Please start the program.')
     }
 })
 
@@ -465,7 +329,8 @@ $("#select" ).on('change', function()
         if (temp_exerciseName !== '(none)')
         {
             exerciseName = temp_exerciseName;
-            exerciseMp3 = 'voice/semi/' + exerciseName + '.mp3';
+            // exerciseMp3 = 'voice/semi/' + exerciseName + '.mp3';
+            exerciseMp3 = 'voice/manual/start.mp3'
             console.log('(dropdown)', exerciseName);
             continue_exercise = true;
             checkPoint();
@@ -503,7 +368,6 @@ function drawPoint(ctx, y, x, r, color) {
   ctx.fillStyle = color;
   ctx.fill();
 }
-
 
 // Draws a line on a canvas, i.e. a joint
 function drawSegment([ay, ax], [by, bx], color, scale, ctx) {
@@ -604,7 +468,7 @@ function keypoint_scores(keypoints) {
 
 function drawKeypoints(keypoints, minConfidence, ctx, scale = 1) {
     
-    posture_colorization(keypoints, minConfidence);
+    // posture_colorization(keypoints, minConfidence);
   
     for (let i = 0; i < keypoints.length; i++) {
         const keypoint = keypoints[i];
@@ -658,93 +522,6 @@ function toggleLoadingUI(
   }
 }
 
-// ISSUE :: NO USE
-
-// Converts an arary of pixel data into an ImageData object
-// async function renderToCanvas(a, ctx) {
-//   const [height, width] = a.shape;
-//   const imageData = new ImageData(width, height);
-// 
-//   const data = await a.data();
-// 
-//   for (let i = 0; i < height * width; ++i) {
-//     const j = i * 4;
-//     const k = i * 3;
-// 
-//     imageData.data[j + 0] = data[k + 0];
-//     imageData.data[j + 1] = data[k + 1];
-//     imageData.data[j + 2] = data[k + 2];
-//     imageData.data[j + 3] = 255;
-//   }
-// 
-//   ctx.putImageData(imageData, 0, 0);
-// }
-
-
-// Draw an image on a canvas
-// function renderImageToCanvas(image, size, canvas) {
-//   canvas.width = size[0];
-//   canvas.height = size[1];
-//   const ctx = canvas.getContext('2d');
-// 
-//   ctx.drawImage(image, 0, 0);
-// }
-
-
-
-//  * Draw heatmap values, one of the model outputs, on to the canvas
-//  * Read our blog post for a description of PoseNet's heatmap outputs
-//  * https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5
-function drawHeatMapValues(heatMapValues, outputStride, canvas) {
-  const ctx = canvas.getContext('2d');
-  const radius = 5;
-  const scaledValues = heatMapValues.mul(tf.scalar(outputStride, 'int32'));
-
-  drawPoints(ctx, scaledValues, radius, color);
-}
-
-
-//  * Used by the drawHeatMapValues method to draw heatmap points on to
-//  * the canvas
-function drawPoints(ctx, points, radius, color) {
-  const data = points.buffer().values;
-
-  for (let i = 0; i < data.length; i += 2) {
-    const pointY = data[i];
-    const pointX = data[i + 1];
-
-    if (pointX !== 0 && pointY !== 0) {
-      ctx.beginPath();
-      ctx.arc(pointX, pointY, radius, 0, 2 * Math.PI);
-      ctx.fillStyle = color;
-      ctx.fill();
-    }
-  }
-}
-
-
-//  * Draw offset vector values, one of the model outputs, on to the canvas
-//  * Read our blog post for a description of PoseNet's offset vector outputs
-//  * https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5
-function drawOffsetVectors(
-    heatMapValues, offsets, outputStride, scale = 1, ctx) {
-  const offsetPoints =
-      posenet.singlePose.getOffsetPoints(heatMapValues, outputStride, offsets);
-
-  const heatmapData = heatMapValues.buffer().values;
-  const offsetPointsData = offsetPoints.buffer().values;
-
-  for (let i = 0; i < heatmapData.length; i += 2) {
-    const heatmapY = heatmapData[i] * outputStride;
-    const heatmapX = heatmapData[i + 1] * outputStride;
-    const offsetPointY = offsetPointsData[i];
-    const offsetPointX = offsetPointsData[i + 1];
-
-    drawSegment(
-        [heatmapY, heatmapX], [offsetPointY, offsetPointX], color, scale, ctx);
-  }
-}
-
 // ========================================================================================================
 //                                             file :: camera.js
 // ========================================================================================================
@@ -781,10 +558,8 @@ async function setupCamera() {
       mediaRecorder.onstop = async function(ev) {
         if (is_api_call)
         {
-          // debug
           const blob = new Blob(chunks, {'type':'video/mp4;'}); chunks = [];
 
-          const blobVideoURL = window.URL.createObjectURL(blob);
           const filename = patientId + '-' + exerciseName + '-clientRaw.mp4'
           const rawVideoUrl = 'https://romai.injurycloud.com/client_storage/' + filename
           var base64data = 'noise';
@@ -827,17 +602,17 @@ async function setupCamera() {
                 .then(responseJSON => {console.log('(response) client_storage :: ', responseJSON)})
                 .then(fetch('https://romai.injurycloud.com/process_exercise/', post_data)
                             .then(response => response.json())
-                            .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)}));            
+                            .then(responseJSON => {console.log('(response) enqueue :: ', responseJSON)}));
             
-            // psuedo api calls
+            // PSEUDO :: api calls
             // console.log('(request) client_storage :: ' + filename);
-            // console.log(base64data);
+            // console.log('(request) base64data :: ' + base64data.substring(0, 121));
+            // console.log('(typeof) base64data :: ' + typeof base64data);
             // console.log('(apicall) client_storage :: ' + post_storage_data);
             // console.log('(apicall) process_exercise :: ' + post_data);
       }
       else 
       {
-        // debug
         chunks = [];
       }
     }
@@ -889,7 +664,7 @@ const setResNet = {
 
 const guiState = {
   algorithm: 'single-pose',
-  input: setResNet,        // DEPLOY SHORTCUT :: change to ResNet50 model
+  input: setMobileNet,        // ALERT :: DEPLOY SHORTCUT :: change to ResNet50 model
   singlePoseDetection: {
     minPoseConfidence: 0.1,
     minPartConfidence: 0.5,
@@ -1075,62 +850,13 @@ function detectPoseInRealTime(video, net) {
       
 // ---------------- territory :: full body check (starts) -----------------------
         frame_count = frame_count + 1;
-        check_userVoice();
-
-        if (head_bool && leg_bool && user_voice !== 'yes' && user_voice !== 'stop' && continue_exercise)
+        if (head_bool && leg_bool && continue_exercise)     // hasn't started yet
         {
             // TEST
-            play_audio(exerciseMp3, '(voice) ' + exerciseName + ' starting...'); resetTimer(21000);
-            // play_audio('./voice/say_yes.mp3', '(voice) say yes'); resetTimer(5000);
-            
-            is_voice = false;
-            beep_mb = false;
-            wrong_pose_mb = false;
-            completed_mb = false;
-            start_record = true;
-            waiting_yes_time = Date.now();
-            
-            if (!is_voice_recognizer_enabled)
-            {   
-                is_voice_recognizer_enabled = true;
-                console.log('(voice_recognizer) :: ENABLED');
-            }
-        }
-        else if (head_bool && leg_bool && user_voice === 'yes' && continue_exercise)
-        {
-            // pose_bool = posture_right_hands_up(keypoints); // FUTURE :: DECISION SHORTCUT
-            pose_bool = true;
-            is_voice = false;
-            if (pose_bool)
-            {
-                beep_mb = play_audio_once('./voice/finish_say_stop.mp3', beep_mb, '(voice) Please start the exercise after listening to the BEEP sound. When finished, say, STOP');
-                setTimeout(recording, 6500);
-            }
-            else
-            {
-                wrong_pose_mb = play_audio_once('./voice/wrong_pose.mp3', wrong_pose_mb, '(voice) wrong pose');
-            }
-        }
-        else if (head_bool && leg_bool && user_voice === 'stop' && continue_exercise)
-        {
+            play_audio(exerciseMp3, '(voice) ' + exerciseName + ' starting...');
             continue_exercise = false;
-            completed_mb = play_audio_once('./voice/semi/completed-continue-or-terminate.mp3', completed_mb, '(voice) exercise completed');
-            
-            if (is_voice_recognizer_enabled) 
-            {
-                is_voice_recognizer_enabled = false;
-                console.log('(voice_recognizer) :: DISABLED');
-            }
-            checkPoint();
-        }
-        else
-        {
-            // continue_exercise = false
-            if (is_voice_recognizer_enabled) 
-            {
-                is_voice_recognizer_enabled = false;
-                console.log('(voice_recognizer) :: DISABLED');
-            }
+            setTimeout(start_recording, 10000);
+            setTimeout(stop_recording, 15000);
         }
 // ---------------- territory :: full body check (ends) -----------------------
     });
