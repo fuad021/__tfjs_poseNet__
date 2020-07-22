@@ -136,17 +136,17 @@ function print_queue(item, index) {
       
       a1.appendChild(link1);
       a1.title = "raw_video";  
-      a1.href = "https://romai.injurycloud.com/" + item.request_output.raw_video;
+      a1.href = item.request_output.raw_video;
       a1.target = "_blank"
 
       a2.appendChild(link2);
       a2.title = "rendered_picture";  
-      a2.href = "https://romai.injurycloud.com/" + item.request_output.rendered_picture;
+      a2.href = item.request_output.rendered_picture;
       a2.target = "_blank"
 
       a3.appendChild(link3);
       a3.title = "rendered_video";  
-      a3.href = "https://romai.injurycloud.com/" + item.request_output.rendered_video;
+      a3.href = item.request_output.rendered_video;
       a3.target = "_blank"
       
       queue.appendChild(document.createTextNode(item.exerciseName + " :: "));
@@ -162,9 +162,6 @@ function print_queue(item, index) {
       console.log('(api) queue :: no new exercise');
   }
 }
-
-
-
 
 // unique identifier
 function uuidv4() {
