@@ -3,6 +3,8 @@ let chunks = [];
 let if_record = true;
 let mediaRecorder = 'not init';
 
+document.getElementById("status").innerHTML = 'Camera :: INACTIVE (no video recorded or snapshot taken yet).';
+
 function uuidv4()
 {
     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
@@ -42,8 +44,13 @@ $(document).ready(function(){
       if (!is_start)
       {
           is_start = true;
-          console.log('(recording) started...');
+          document.getElementById("status").innerHTML = "Camera :: RECORDING...";
+
           start_recording();  // TODO  
+      }
+      else
+      {
+          document.getElementById("status").innerHTML = "Camera :: RECORDING!!! Please stop recording first to start again.";
       }
   })
 
@@ -52,9 +59,30 @@ $(document).ready(function(){
       if (is_start)
       {
           is_start = false;
-          console.log('(recording) stopped...');
+          document.getElementById("status").innerHTML = "Camera :: INACTIVE (video recorded).";
           stop_recording();   // TODO 
       }
+      else
+      {
+          document.getElementById("status").innerHTML = "Camera :: INACTIVE (video recorded). Please start recording first.";
+      }
+  })
+  
+  $("#snap" ).on('click', function()
+  {
+      const canvas = document.getElementById('output');
+      const ctx = canvas.getContext('2d');
+      const snapURL = canvas.toDataURL("image/png");
+
+      const link = document.createElement('a');
+      link.href = snapURL;
+      link.download = uuidv4()+'.png';
+      
+      document.body.appendChild(link);
+      link.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));	          
+      document.body.removeChild(link);
+      
+      document.getElementById("status").innerHTML = "Camera :: INACTIVE (snapshot taken).";
   })
 });
 // ---------------- territory :: jQuery - buttons & dropdown (ends) -----------------------
@@ -158,6 +186,8 @@ function toggleLoadingUI(showLoadingUI, loadingDivId = 'loading', mainDivId = 'm
 const videoWidth = 480;
 const videoHeight = 480;
 
+
+
 //  * Loads a the camera to be used in the demo
 async function setupCamera() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -195,7 +225,6 @@ async function setupCamera() {
           document.body.appendChild(link);
           link.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));	          
           document.body.removeChild(link);
-          console.log("Video saved successfully.");
       }
 // ---------------- territory :: record exercise (ends) -----------------------
 
