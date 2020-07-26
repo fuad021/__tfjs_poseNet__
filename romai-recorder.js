@@ -3,7 +3,7 @@ let chunks = [];
 let if_record = true;
 let mediaRecorder = 'not init';
 
-document.getElementById("status").innerHTML = 'Camera :: INACTIVE (no video recorded or snapshot taken yet).';
+document.getElementById("status").innerHTML = 'No video recorded or snapshot taken yet.';
 
 function uuidv4()
 {
@@ -44,13 +44,13 @@ $(document).ready(function(){
       if (!is_start)
       {
           is_start = true;
-          document.getElementById("status").innerHTML = "Camera :: RECORDING...";
+          document.getElementById("status").innerHTML = "Recording...";
 
           start_recording();  // TODO  
       }
       else
       {
-          document.getElementById("status").innerHTML = "Camera :: RECORDING!!! Please stop recording first to start again.";
+          document.getElementById("status").innerHTML = "RECORDING!!! Please stop recording first to start again.";
       }
   })
 
@@ -59,12 +59,12 @@ $(document).ready(function(){
       if (is_start)
       {
           is_start = false;
-          document.getElementById("status").innerHTML = "Camera :: INACTIVE (video recorded).";
+          document.getElementById("status").innerHTML = "Video Recorded.";
           stop_recording();   // TODO 
       }
       else
       {
-          document.getElementById("status").innerHTML = "Camera :: INACTIVE (video recorded). Please start recording first.";
+          document.getElementById("status").innerHTML = "Please start recording first.";
       }
   })
   
@@ -82,7 +82,7 @@ $(document).ready(function(){
       link.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));	          
       document.body.removeChild(link);
       
-      document.getElementById("status").innerHTML = "Camera :: INACTIVE (snapshot taken).";
+      document.getElementById("status").innerHTML = "Snapshot Taken.";
   })
 });
 // ---------------- territory :: jQuery - buttons & dropdown (ends) -----------------------
