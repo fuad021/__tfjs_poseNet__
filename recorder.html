@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ROM AI - MyMedicalHub</title>
+        <script type="text/javascript" src="jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="./style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+
+    <body>                
+        <div id="info" style='display:none'></div>
+        
+        <div id="loading" style='display:flex'>
+            <div class="spinner-text">
+                Loading...
+            </div>
+            <div class="sk-spinner sk-spinner-pulse"></div>
+        </div>
+        
+        <div id='main' style='display:none'>
+            <video id="video" playsinline style="display: none;"></video>
+            <canvas id="output" />
+        </div>
+        
+        <button id='start'>Start</button>
+        <button id='stop'>Stop</button>
+        <button id='snap'>Snapshot</button>
+        
+        <p id="status" style="padding-bottom:5em"></p>
+        
+        <div class="footer">
+            <div class="footer-text">
+                <p>
+                    ROM AI @ MMH
+                </p>
+            </div>
+        </div>
+        
+        <script src="romai-recorder.js"></script>
+        
+    </body>
+</html>
