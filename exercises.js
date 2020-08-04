@@ -648,11 +648,11 @@ const defaultResNetStride = 32;
 const defaultResNetInputResolution = 250;
 
 const setMobileNet = {
-    architecture: 'MobileNetV1',
-    outputStride: defaultMobileNetStride,
-    inputResolution: defaultMobileNetInputResolution,
-    multiplier: defaultMobileNetMultiplier,
-    quantBytes: defaultQuantBytes
+  architecture: 'MobileNetV1',
+  outputStride: defaultMobileNetStride,
+  inputResolution: defaultMobileNetInputResolution,
+  multiplier: defaultMobileNetMultiplier,
+  quantBytes: defaultQuantBytes
 }
 
 const setResNet = {
